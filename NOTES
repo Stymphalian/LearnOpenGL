@@ -1,0 +1,2 @@
+compiledb make
+compiledb make && [[ -f noin ]] && ./noin
