@@ -32,3 +32,5 @@
 *.app
 
 .clangd
+tags
+noin

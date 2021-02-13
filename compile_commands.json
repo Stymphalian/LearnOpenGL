@@ -63,5 +63,57 @@
    "stb_image.o"
   ],
   "file": "src/stb_image.cc"
+ },
+ {
+  "directory": "/home/jordan/dev/lab/gl/gl",
+  "arguments": [
+   "clang++",
+   "-Wall",
+   "-std=c++17",
+   "-c",
+   "src/camera.cc",
+   "-o",
+   "camera.o"
+  ],
+  "file": "src/camera.cc"
+ },
+ {
+  "directory": "/home/jordan/dev/lab/gl/gl",
+  "arguments": [
+   "clang++",
+   "-Wall",
+   "-std=c++17",
+   "-c",
+   "src/misc.cc",
+   "-o",
+   "misc.o"
+  ],
+  "file": "src/misc.cc"
+ },
+ {
+  "directory": "/home/jordan/dev/lab/gl/gl",
+  "arguments": [
+   "clang++",
+   "-Wall",
+   "-std=c++17",
+   "-c",
+   "src/object.cc",
+   "-o",
+   "object.o"
+  ],
+  "file": "src/object.cc"
+ },
+ {
+  "directory": "/home/jordan/dev/lab/gl/gl",
+  "arguments": [
+   "clang++",
+   "-Wall",
+   "-std=c++17",
+   "-c",
+   "src/hand_mesh.cc",
+   "-o",
+   "hand_mesh.o"
+  ],
+  "file": "src/hand_mesh.cc"
  }
 ]
