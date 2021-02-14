@@ -3,12 +3,15 @@
   "directory": "/home/jordan/dev/lab/gl/gl",
   "arguments": [
    "clang++",
+   "-c",
+   "-ansi",
    "-Wall",
    "-std=c++17",
-   "-c",
+   "-O3",
+   "-Iinclude",
    "src/main.cc",
    "-o",
-   "main.o"
+   "build/main.o"
   ],
   "file": "src/main.cc"
  },
@@ -16,12 +19,15 @@
   "directory": "/home/jordan/dev/lab/gl/gl",
   "arguments": [
    "clang++",
+   "-c",
+   "-ansi",
    "-Wall",
    "-std=c++17",
-   "-c",
+   "-O3",
+   "-Iinclude",
    "src/cloth.cc",
    "-o",
-   "cloth.o"
+   "build/cloth.o"
   ],
   "file": "src/cloth.cc"
  },
@@ -29,12 +35,15 @@
   "directory": "/home/jordan/dev/lab/gl/gl",
   "arguments": [
    "clang++",
+   "-c",
+   "-ansi",
    "-Wall",
    "-std=c++17",
-   "-c",
+   "-O3",
+   "-Iinclude",
    "src/point.cc",
    "-o",
-   "point.o"
+   "build/point.o"
   ],
   "file": "src/point.cc"
  },
@@ -42,12 +51,15 @@
   "directory": "/home/jordan/dev/lab/gl/gl",
   "arguments": [
    "clang++",
+   "-c",
+   "-ansi",
    "-Wall",
    "-std=c++17",
-   "-c",
+   "-O3",
+   "-Iinclude",
    "src/mesh.cc",
    "-o",
-   "mesh.o"
+   "build/mesh.o"
   ],
   "file": "src/mesh.cc"
  },
@@ -55,12 +67,15 @@
   "directory": "/home/jordan/dev/lab/gl/gl",
   "arguments": [
    "clang++",
+   "-c",
+   "-ansi",
    "-Wall",
    "-std=c++17",
-   "-c",
+   "-O3",
+   "-Iinclude",
    "src/stb_image.cc",
    "-o",
-   "stb_image.o"
+   "build/stb_image.o"
   ],
   "file": "src/stb_image.cc"
  },
@@ -68,12 +83,15 @@
   "directory": "/home/jordan/dev/lab/gl/gl",
   "arguments": [
    "clang++",
+   "-c",
+   "-ansi",
    "-Wall",
    "-std=c++17",
-   "-c",
+   "-O3",
+   "-Iinclude",
    "src/camera.cc",
    "-o",
-   "camera.o"
+   "build/camera.o"
   ],
   "file": "src/camera.cc"
  },
@@ -81,12 +99,15 @@
   "directory": "/home/jordan/dev/lab/gl/gl",
   "arguments": [
    "clang++",
+   "-c",
+   "-ansi",
    "-Wall",
    "-std=c++17",
-   "-c",
+   "-O3",
+   "-Iinclude",
    "src/misc.cc",
    "-o",
-   "misc.o"
+   "build/misc.o"
   ],
   "file": "src/misc.cc"
  },
@@ -94,12 +115,15 @@
   "directory": "/home/jordan/dev/lab/gl/gl",
   "arguments": [
    "clang++",
+   "-c",
+   "-ansi",
    "-Wall",
    "-std=c++17",
-   "-c",
+   "-O3",
+   "-Iinclude",
    "src/object.cc",
    "-o",
-   "object.o"
+   "build/object.o"
   ],
   "file": "src/object.cc"
  },
@@ -107,12 +131,15 @@
   "directory": "/home/jordan/dev/lab/gl/gl",
   "arguments": [
    "clang++",
+   "-c",
+   "-ansi",
    "-Wall",
    "-std=c++17",
-   "-c",
+   "-O3",
+   "-Iinclude",
    "src/hand_mesh.cc",
    "-o",
-   "hand_mesh.o"
+   "build/hand_mesh.o"
   ],
   "file": "src/hand_mesh.cc"
  }

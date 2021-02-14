@@ -41,6 +41,7 @@ public:
   glm::vec3 scalar = glm::vec3(1.0f);
 
   Scaler& scale(float percent); 
+  Scaler& scale(float x, float y, float z); 
   glm::mat4 matrix(glm::mat4 model); 
 };
 

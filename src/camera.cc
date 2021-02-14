@@ -47,6 +47,10 @@ void Camera::use(float aspect_ratio, Shader* shader) {
   //glm::mat4 mvp = projection * view  * model;
   shader->setMat4("projection", projection(aspect_ratio));
   shader->setMat4("view", view());
+  //shader->setMat4("inv_projection", projection(aspect_ratio));
+  shader->setMat4("inv_view", glm::inverse(view()));
+
+  shader->set3Float("viewPos", pos);
 }
 
 void Camera::update_camera_vectors() {

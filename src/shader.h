@@ -119,6 +119,10 @@ public:
         GLint id = glGetUniformLocation(this->Program, name.c_str());
         glUniform3f(id, v1, v2, v3);
     }
+    void set3Float(const std::string &name, glm::vec3 v) {
+        GLint id = glGetUniformLocation(this->Program, name.c_str());
+        glUniform3f(id, v.x, v.y, v.z);
+    }
     void set4Float(const std::string &name, 
                    float v1, float v2, float v3, float v4) {
         GLint id = glGetUniformLocation(this->Program, name.c_str());

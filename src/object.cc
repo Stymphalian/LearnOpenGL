@@ -70,6 +70,11 @@ Scaler& Scaler::scale(float percent) {
   return *this;
 }
 
+Scaler& Scaler::scale(float x, float y, float z) {
+  scalar = glm::vec3(x,y,z);
+  return *this;
+}
+
 glm::mat4 Scaler::matrix(glm::mat4 model) {
   model = glm::scale(model, scalar);
   return model;
@@ -78,9 +83,11 @@ glm::mat4 Scaler::matrix(glm::mat4 model) {
 void Object::draw(Shader& shader) {
   glm::mat4 model = glm::mat4(1.0f);
   model = position.matrix(model);
-  model = rotation.matrix(model);
   model = scale.matrix(model);
+  model = rotation.matrix(model);
+  //model = scale.matrix(model);
 
   shader.setMat4("model", model);
+  shader.setMat4("inv_model", glm::inverse(model));
   mesh.draw(shader);
 }

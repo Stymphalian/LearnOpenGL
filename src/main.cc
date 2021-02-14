@@ -56,7 +56,7 @@ public:
     num_frames += 1;
     current_time_secs = glfwGetTime();
     if (current_time_secs - last_time_secs >= 1.0f) {
-      printf("%10f %5d fps %10f\n", current_time_secs, num_frames, delta_time);
+      //printf("%10f %5d fps %10f\n", current_time_secs, num_frames, delta_time);
       num_frames = 0;
       delta_time_secs = current_time_secs - last_time_secs;
       last_time_secs += 1.0f;
@@ -290,8 +290,10 @@ int main(int argc, char **argv) {
     objects.push_back(Object(cube));
     objects.push_back(Object(cube));
     objects[0].position.move_to(glm::vec3(0.75, 0,0));
-    objects[0].rotation.rotateX(20);
+    //objects[0].rotation.rotateX(20);
     objects[1].position.move_to(glm::vec3(-0.75, 0,0));
+    //objects[1].rotation.rotateY(45);
+    //objects[1].scale.scale(1.0f, 0.7f, 0.25f);
 
     vector<Object> lights; 
     lights.push_back(Object(cube));
@@ -300,18 +302,23 @@ int main(int argc, char **argv) {
 
     // Setup shaders
     shader.use();
-    shader.setMat4("projection", cam.projection(ctx.aspect_ratio()));
     shader.set3Float("objectColor", 1.0f, 0.5f, 0.31f);
     shader.set3Float("lightColor",  1.0f, 1.0f, 1.0f);
-    light_shader.use();
-    light_shader.setMat4("projection", cam.projection(ctx.aspect_ratio()));
-    debug_shader.use();
-    debug_shader.setMat4("projection", cam.projection(ctx.aspect_ratio()));
+    shader.set3Float("lightPos", lights[0].position.pos);
 
     // Main loop
     while (!glfwWindowShouldClose(ctx.window)) {
       ctx.update_frames();
       process_input(ctx, *Input::get(), &cam);
+
+      // Physics 
+      //lights[0].position.move_to(
+      //    glm::vec3(
+      //      cos(ctx.current_time_secs*1.5)*2.5,
+      //      0.0f, 
+      //      sin(ctx.current_time_secs*1.5)*2.5));
+      //shader.use();
+      //shader.set3Float("lightPos", lights[0].position.pos);
 
       // Render
       glClearColor(0,0,0,0);
