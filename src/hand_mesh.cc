@@ -1,6 +1,7 @@
 #include "hand_mesh.h"
 
 #include <vector>
+#include <map>
 #include <glm/glm.hpp>
 #include "mesh.h"
 
@@ -95,10 +96,12 @@ Mesh create_cube_mesh(std::vector<unsigned int> texs) {
 }
 
 
-Mesh create_cube_mesh2(std::vector<unsigned int> texs) {
+Mesh create_cube_mesh2(std::map<string, unsigned int> texs) {
   vector<Texture> textures;
-  for (unsigned int t: texs) {
-    textures.push_back({t, "texture_diffuse"});
+  for (const auto& e: texs) {
+    textures.push_back({e.second, e.first});
+    //textures.push_back({t, "texture_diffuse"});
+    //textures.push_back({t, "material.diffuse"});
   }
 
   vector<Vertex> cube = {

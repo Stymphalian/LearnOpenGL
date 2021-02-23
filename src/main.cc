@@ -280,11 +280,18 @@ int main(int argc, char **argv) {
     printf("Program start.\n");
 
     // Load a texture
-    unsigned int texture1 = load_texture("res/container.jpg");
-    unsigned int texture2 = load_texture("res/awesomeface.png");
+    //unsigned int texture1 = load_texture("res/container.jpg");
+    //unsigned int texture2 = load_texture("res/awesomeface.png");
+    unsigned int texture3 = load_texture("res/container2.png");
+    unsigned int texture4 = load_texture("res/container2_specular.png");
+    unsigned int texture5 = load_texture("res/matrix.jpg");
 
     // Objects and meshes
-    Mesh cube = create_cube_mesh2({});
+    Mesh cube = create_cube_mesh2({
+        {"material.diffuse",texture3}, 
+        {"material.specular", texture4}, 
+        {"material.emission", texture5},
+    });
 
     vector<Object> objects;
     objects.push_back(Object(cube));
@@ -302,11 +309,6 @@ int main(int argc, char **argv) {
 
     // Setup shaders
     shader.use();
-    //shader.set3Float("lightColor",  1.0f, 1.0f, 1.0f);
-    //shader.set3Float("lightPos", lights[0].position.pos);
-    shader.set3Float("material.ambient", 1.0f, 0.5f, 0.31f);
-    shader.set3Float("material.diffuse", 1.0f, 0.5f, 0.31f);
-    shader.set3Float("material.specular", 0.5f, 0.5f, 0.5f);
     shader.setFloat("material.shininess", 32.0f);
     shader.set3Float("light.ambient", 0.2f, 0.2f, 0.2f);
     shader.set3Float("light.diffuse", 0.5f, 0.5f, 0.5f);

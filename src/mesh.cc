@@ -24,18 +24,33 @@ Mesh::Mesh(std::vector<Vertex> verts,
 void Mesh::draw(Shader& shader) {
   unsigned int diffuse_nr = 1;
   unsigned int specular_nr = 1;
+  unsigned int material_nr = 1;
+  //unsigned int material_nr = 1;
   for (unsigned int i = 0; i < textures.size(); i++) {
     glActiveTexture(GL_TEXTURE0 + i);
     std::string number;
     std::string name = textures[i].type;
     if (name == "texture_diffuse") {
       number = std::to_string(diffuse_nr++);
+      name = name + number;
     } else if (name == "specular_diffuse") {
       number = std::to_string(specular_nr++);
+      name = name + number;
+    } else if (name == "material.diffuse") {
+      number = std::to_string(material_nr++);
+      //name = "material" + number + ".diffuse";
+      name = "material.diffuse";
+    } else if (name == "material.specular") {
+      number = std::to_string(material_nr++);
+      //name = "material" + number + ".specular";
+      name = "material.specular";
+    } else if (name == "material.emission") {
+      name = "material.emission";
     }
 
     //shader.setFloat(("material." + name + number).c_str(), i);
-    shader.setInt((name + number).c_str(), i);
+    //shader.setInt((name + number).c_str(), i);
+    shader.setInt(name.c_str(), i);
     glBindTexture(GL_TEXTURE_2D, textures[i].id);
   }
   glActiveTexture(GL_TEXTURE0);
