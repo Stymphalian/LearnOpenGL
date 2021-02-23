@@ -13,6 +13,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <glm/gtc/random.hpp>
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -49,6 +50,7 @@ public:
   double last_frame = 0.0f;
 
   bool debug = false;
+  bool move_light = false;
 
   MainContext() {}
 
@@ -89,10 +91,16 @@ public:
     return &input;
   }
 private:
-  Input(){}
+  Input(){
+    for(int i =0 ; i < 1024; i++) { keys[i] = false; }
+  }
   ~Input(){}
 };
 
+std::ostream& operator<<(std::ostream& os, const glm::vec3& v) {
+    os << "(" << v.x  << "," << v.y << "," << v.z << ")";
+    return os;
+}
 
 // Function Defs
 // ----------------------------------
@@ -131,6 +139,7 @@ void key_callback(GLFWwindow* window, int key, int scancode,
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+  return;
   Input* input = Input::get();
 
   static bool first_mouse = true;
@@ -149,6 +158,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 
 void mouse_button_callback(GLFWwindow* window, int button, int action,
                            int mods) {
+  return;
   Input* input = Input::get();
   if (action == GLFW_PRESS) {
     input->mouse_left = button == GLFW_MOUSE_BUTTON_LEFT;
@@ -182,42 +192,47 @@ void process_input(
   }
 
   if (input.keys[GLFW_KEY_LEFT]) {
-    cam->rotate(Camera::YAW_LEFT, context.delta_time);
+    cam->process_rotate(Camera::YAW_LEFT, context.delta_time);
   } else if (input.keys[GLFW_KEY_RIGHT]) {
-    cam->rotate(Camera::YAW_RIGHT, context.delta_time);
+    cam->process_rotate(Camera::YAW_RIGHT, context.delta_time);
   } else if (input.keys[GLFW_KEY_UP]) {
-    cam->rotate(Camera::PITCH_UP, context.delta_time);
+    cam->process_rotate(Camera::PITCH_UP, context.delta_time);
   } else if (input.keys[GLFW_KEY_DOWN]) {
-    cam->rotate(Camera::PITCH_DOWN, context.delta_time);
+    cam->process_rotate(Camera::PITCH_DOWN, context.delta_time);
+  } else if (input.keys[GLFW_KEY_PERIOD]) {
+    cam->process_rotate(Camera::ROLL_CLOCKWISE, context.delta_time);
+  } else if (input.keys[GLFW_KEY_COMMA]) {
+    cam->process_rotate(Camera::ROLL_COUNTER_CLOCKWISE, context.delta_time);
   }
 
   if (input.keys[GLFW_KEY_T]) {
     context.debug = !context.debug;
   }
+  if (input.keys[GLFW_KEY_L]) {
+    context.move_light = !context.move_light;
+  }
 
   if (input.keys[GLFW_KEY_1]) {
-    cam->pos = glm::vec3(0.0, 0.0, 3.0f);
-    cam->front = glm::vec3(0.0, 0.0, -1.0f);
-    cam->yaw = -90.0f;
-    cam->pitch = 0.0f;
+    cam->translator.move_to(glm::vec3(0,0,5.f));
+    cam->rotator.reset();
   }
   if (input.keys[GLFW_KEY_2]) {
-    cam->pos = glm::vec3(3.0f, 0.0, 0.0f);
-    cam->front = glm::vec3(-1.0f, 0.0, 0.0);
-    cam->yaw = -90.0f;
-    cam->pitch = 0.0f;
+    cam->translator.move_to(glm::vec3(0,0,-5.f));
+    cam->rotator.reset();
+    cam->rotator.rotateY(180.0f);
   }
   if (input.keys[GLFW_KEY_3]) {
-    cam->pos = glm::vec3(0.0f, 3.0, 0.0f);
-    cam->front = glm::vec3(0.0f, -1.0, 0.0);
-    cam->yaw = -90.0f;
-    cam->pitch = -89.0f;
+    cam->translator.move_to(glm::vec3(3, 3, 3));
+    cam->rotator.reset();
+    cam->rotator.rotateY(-45);
+    cam->rotator.rotateX(-45);
   }
   if (input.keys[GLFW_KEY_4]) {
-    cam->pos = glm::vec3(2.0f, 2.0f, 2.0f);
-    cam->yaw = -135.0f;
-    cam->pitch = -35;
-    cam->update_camera_vectors();
+    cam->translator.move_to(glm::vec3(-3, 3, -3));
+    cam->rotator.reset();
+    cam->rotator.rotateY(180);
+    cam->rotator.relativeRotateY(-45);
+    cam->rotator.rotateX(-45);
   }
 
   //double x_offset = input.mouse_x - input.prev_mouse_x;
@@ -290,30 +305,51 @@ int main(int argc, char **argv) {
     Mesh cube = create_cube_mesh2({
         {"material.diffuse",texture3}, 
         {"material.specular", texture4}, 
-        {"material.emission", texture5},
+        //{"material.emission", texture5},
     });
 
     vector<Object> objects;
-    objects.push_back(Object(cube));
-    objects.push_back(Object(cube));
-    objects[0].position.move_to(glm::vec3(0.75, 0,0));
+    glm::vec3 cubePositions[] = {
+        glm::vec3( 0.0f,  0.0f,  0.0f),
+        glm::vec3( 2.0f,  5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3( 2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f,  3.0f, -7.5f),
+        glm::vec3( 1.3f, -2.0f, -2.5f),
+        glm::vec3( 1.5f,  2.0f, -2.5f),
+        glm::vec3( 1.5f,  0.2f, -1.5f),
+        glm::vec3(-1.3f,  1.0f, -1.5f)
+    };
+    for (int i = 0; i< 10; i++ ) {
+      Object o = Object(cube);
+      o.position.move_to(cubePositions[i]);
+      float angle = 20.0f * i;
+      o.rotation.rotate(glm::vec3(1.0f, 0.3f, 0.5f), angle);
+      objects.push_back(o);
+    }
+    //objects.clear();
+    //objects.push_back(Object(cube));
+    //objects.push_back(Object(cube));
+    //objects[0].position.move_to(glm::vec3(0.75, 0,0));
     //objects[0].rotation.rotateX(20);
-    objects[1].position.move_to(glm::vec3(-0.75, 0,0));
+    //objects[1].position.move_to(glm::vec3(-0.75, 0,0));
     //objects[1].rotation.rotateY(45);
     //objects[1].scale.scale(1.0f, 0.7f, 0.25f);
 
     vector<Object> lights; 
     lights.push_back(Object(cube));
-    lights[0].position.move_to(glm::vec3(1, 1,1));
+    lights[0].position.move_to(glm::vec3(1,1,1));
     lights[0].scale.scale(0.2);
 
     // Setup shaders
     shader.use();
     shader.setFloat("material.shininess", 32.0f);
-    shader.set3Float("light.ambient", 0.2f, 0.2f, 0.2f);
+    shader.set3Float("light.ambient", 0.1f, 0.1f, 0.1f);
     shader.set3Float("light.diffuse", 0.5f, 0.5f, 0.5f);
     shader.set3Float("light.specular", 1.0f, 1.0f, 1.0f);
     shader.set3Float("light.position", lights[0].position.pos);
+    shader.setBool("light.is_directional", false);
 
     // Main loop
     while (!glfwWindowShouldClose(ctx.window)) {
@@ -321,13 +357,15 @@ int main(int argc, char **argv) {
       process_input(ctx, *Input::get(), &cam);
 
       // Physics 
-      lights[0].position.move_to(
-          glm::vec3(
-            cos(ctx.current_time_secs*1.5)*2.5,
-            1.25f, 
-            sin(ctx.current_time_secs*1.5)*2.5));
-      shader.use();
-      shader.set3Float("light.position", lights[0].position.pos);
+      if (ctx.move_light) {
+        lights[0].position.move_to(
+            glm::vec3(
+              cos(ctx.current_time_secs*1.5)*2.5,
+              1.25f, 
+              sin(ctx.current_time_secs*1.5)*2.5));
+        shader.use();
+        shader.set3Float("light.position", lights[0].position.pos);
+      }
 
       // Render
       glClearColor(0,0,0,0);

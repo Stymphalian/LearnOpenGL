@@ -16,19 +16,24 @@ struct Light {
   vec3 ambient;
   vec3 diffuse;
   vec3 specular;
+
+  bool is_directional;
 };
 
 uniform vec3 viewPos;
 uniform Light light;
 uniform Material material;
-uniform sampler2D texture_diffuse1;
-uniform sampler2D texture_diffuse2;
+//uniform sampler2D texture_diffuse1;
+//uniform sampler2D texture_diffuse2;
 
 void main() {
 
   // normal and light directions
   vec3 norm = normalize(NormCoord);
   vec3 lightDir = normalize(light.position - FragPos);
+  if (light.is_directional) {
+    lightDir = normalize(-light.position);
+  }
 
   // ambient colouring
   vec3 diffuse_texture = vec3(texture(material.diffuse, TexCoord));
@@ -48,7 +53,8 @@ void main() {
   // emission
   vec3 emission = vec3(texture(material.emission, TexCoord));
  
-  vec3 result = (emission + ambient + diffuse + specular);
+  //vec3 result = (emission + ambient + diffuse + specular);
+  vec3 result = (ambient + diffuse + specular);
   color = vec4(result, 1.0);
 
   //color = vec4(TexCoord.x, TexCoord.y, 0.0f, 1.0f);

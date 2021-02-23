@@ -3,13 +3,16 @@
 #include <memory>
 #include <string>
 #include <stdexcept>
+#include <iostream>
+
 #include <experimental/filesystem>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 #include "stb_image.h"
 
 template<typename ... Args>
-std::string string_format( const std::string& format, Args ... args )
+std::string string_format(const std::string& format, Args ... args )
 {
     int size = snprintf( nullptr, 0, format.c_str(), args ... ) + 1; // Extra space for '\0'
     if( size <= 0 ){ throw std::runtime_error( "Error during formatting." ); }
@@ -19,3 +22,4 @@ std::string string_format( const std::string& format, Args ... args )
 }
 
 unsigned int load_texture(std::string image_filepath);
+

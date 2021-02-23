@@ -3,10 +3,12 @@
 #include <memory>
 #include <string>
 #include <stdexcept>
+#include <iostream>
 #include <experimental/filesystem>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 
 #include "stb_image.h"
 

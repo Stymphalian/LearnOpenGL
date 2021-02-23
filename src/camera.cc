@@ -6,38 +6,52 @@
 
 #include "shader.h"
 
+
+Camera::Camera() {
+  translator.reset();
+  rotator.reset();
+  translator.pos.z = 3.0f;
+}
+
 void Camera::process_input(Camera::Direction dir, float delta_secs) {
   float velocity = movement_speed * delta_secs;
-  if (dir == Direction::FORWARD) { pos += front*velocity; }
-  if (dir == Direction::BACKWARD) { pos -= front*velocity; }
-  if (dir == Direction::RIGHT) { pos += right*velocity; }
-  if (dir == Direction::LEFT) { pos -= right*velocity; }
-  if (dir == Direction::UP) { pos += world_up*velocity; }
-  if (dir == Direction::DOWN) { pos -= world_up*velocity; }
+  if (dir == Direction::FORWARD) { translator.pos += rotator.front*velocity; }
+  if (dir == Direction::BACKWARD) { translator.pos -= rotator.front*velocity; }
+  if (dir == Direction::RIGHT) { translator.pos -= rotator.right*velocity; }
+  if (dir == Direction::LEFT) { translator.pos += rotator.right*velocity; }
+  if (dir == Direction::UP) { translator.pos += rotator.world_up*velocity; }
+  if (dir == Direction::DOWN) { translator.pos -= rotator.world_up*velocity; }
 }
 
-void Camera::rotate(Camera::Rotate dir, float delta_secs) {
-  if (dir == YAW_RIGHT) {yaw += rotation_speed*delta_secs;}
-  if (dir == YAW_LEFT) {yaw -= rotation_speed*delta_secs;}
-  if (dir == PITCH_UP) {pitch += rotation_speed*delta_secs;}
-  if (dir == PITCH_DOWN) {pitch -= rotation_speed*delta_secs;}
-  clamp_pitch();
-  update_camera_vectors();
-}
-
-void Camera::clamp_pitch() {
-  if (pitch <= -89.0) { pitch = -89.0;}
-  if (pitch >= 89.0) { pitch = 89.0;}
+void Camera::process_rotate(Camera::Rotate dir, float delta_secs) {
+  if (dir == YAW_RIGHT) {
+    rotator.relativeRotateY(rotation_speed * delta_secs);
+  }
+  if (dir == YAW_LEFT) {
+    rotator.relativeRotateY(-rotation_speed * delta_secs);
+  }
+  if (dir == PITCH_UP) {
+    rotator.relativeRotateX(rotation_speed * delta_secs);
+  }
+  if (dir == PITCH_DOWN) {
+    rotator.relativeRotateX(-rotation_speed * delta_secs);
+  }
+  if (dir == ROLL_CLOCKWISE) {
+    rotator.relativeRotateZ(-rotation_speed * delta_secs);
+  }
+  if (dir == ROLL_COUNTER_CLOCKWISE) {
+    rotator.relativeRotateZ(rotation_speed * delta_secs);
+  }
 }
 
 void Camera::process_mouse(float x_offset, float y_offset) {
+  return;
   x_offset *= rotation_senstivity;
   y_offset *= rotation_senstivity;
 
-  yaw += x_offset;
-  pitch += y_offset;
-  clamp_pitch();
-  update_camera_vectors();
+  rotator.yaw += x_offset;
+  rotator.pitch += y_offset;
+  rotator.update_vectors();
 }
 
 void Camera::process_zoom() {
@@ -50,19 +64,7 @@ void Camera::use(float aspect_ratio, Shader* shader) {
   //shader->setMat4("inv_projection", projection(aspect_ratio));
   shader->setMat4("inv_view", glm::inverse(view()));
 
-  shader->set3Float("viewPos", pos);
-}
-
-void Camera::update_camera_vectors() {
-  glm::vec3 f;
-  f.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-  f.y = sin(glm::radians(pitch));
-  f.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-  front = glm::normalize(f);
-
-  // also re-calculate the Right and Up vector
-  right = glm::normalize(glm::cross(front, world_up)); 
-  up = glm::normalize(glm::cross(right, front));
+  shader->set3Float("viewPos", translator.pos);
 }
 
 glm::mat4 Camera::projection(float aspect_ratio) const {
@@ -70,5 +72,7 @@ glm::mat4 Camera::projection(float aspect_ratio) const {
 }
 
 glm::mat4 Camera::view() const {
-  return glm::lookAt(pos, pos+front, world_up);
+  return glm::lookAt(translator.pos, 
+                     translator.pos+rotator.front,
+                     rotator.up);
 }
