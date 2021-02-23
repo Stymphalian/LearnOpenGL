@@ -302,9 +302,16 @@ int main(int argc, char **argv) {
 
     // Setup shaders
     shader.use();
-    shader.set3Float("objectColor", 1.0f, 0.5f, 0.31f);
-    shader.set3Float("lightColor",  1.0f, 1.0f, 1.0f);
-    shader.set3Float("lightPos", lights[0].position.pos);
+    //shader.set3Float("lightColor",  1.0f, 1.0f, 1.0f);
+    //shader.set3Float("lightPos", lights[0].position.pos);
+    shader.set3Float("material.ambient", 1.0f, 0.5f, 0.31f);
+    shader.set3Float("material.diffuse", 1.0f, 0.5f, 0.31f);
+    shader.set3Float("material.specular", 0.5f, 0.5f, 0.5f);
+    shader.setFloat("material.shininess", 32.0f);
+    shader.set3Float("light.ambient", 0.2f, 0.2f, 0.2f);
+    shader.set3Float("light.diffuse", 0.5f, 0.5f, 0.5f);
+    shader.set3Float("light.specular", 1.0f, 1.0f, 1.0f);
+    shader.set3Float("light.position", lights[0].position.pos);
 
     // Main loop
     while (!glfwWindowShouldClose(ctx.window)) {
@@ -312,13 +319,13 @@ int main(int argc, char **argv) {
       process_input(ctx, *Input::get(), &cam);
 
       // Physics 
-      //lights[0].position.move_to(
-      //    glm::vec3(
-      //      cos(ctx.current_time_secs*1.5)*2.5,
-      //      0.0f, 
-      //      sin(ctx.current_time_secs*1.5)*2.5));
-      //shader.use();
-      //shader.set3Float("lightPos", lights[0].position.pos);
+      lights[0].position.move_to(
+          glm::vec3(
+            cos(ctx.current_time_secs*1.5)*2.5,
+            1.25f, 
+            sin(ctx.current_time_secs*1.5)*2.5));
+      shader.use();
+      shader.set3Float("light.position", lights[0].position.pos);
 
       // Render
       glClearColor(0,0,0,0);
