@@ -42,6 +42,7 @@ Rotator& Rotator::rotateX(float angle_deg) {
   if (pitch >= 89.0) { pitch = 89.0; } 
   return *this;
 }
+
 Rotator& Rotator::rotateY(float angle_deg) { 
   yaw = angle_deg;
   return *this;
@@ -83,8 +84,8 @@ glm::mat4 Scaler::matrix(glm::mat4 model) {
 void Object::draw(Shader& shader) {
   glm::mat4 model = glm::mat4(1.0f);
   model = position.matrix(model);
-  model = scale.matrix(model);
   model = rotation.matrix(model);
+  model = scale.matrix(model);
   //model = scale.matrix(model);
 
   shader.setMat4("model", model);
