@@ -43,33 +43,61 @@ public:
 
   // Frame count and time information
   int num_frames = 0;
-  double current_time_secs = 0.0f;
-  double last_time_secs = 0.0f;
-  double last_frame_secs = 0.0f;
-  double delta_time = 0.0f;
-
-  //double delta_time_secs = 0.0f;
-  //double last_frame = 0.0f;
+  double realtime_ms = 0.0f;
+  double last_time_ms = 0.0f;
+  double delta_ms = 0.0f;
 
   bool debug = false;
   bool move_light = false;
 
-  MainContext() {}
+  Timer graphicsTimer;
+  Timer physicsTimer;
+  Timer inputTimer;
+  VirtualClock graphicsClock;
+  VirtualClock physicsClock;
+  GlfwClock realtimeClock;
+  FrameCounter physicsFrameCounter;
+  FrameCounter graphicsFrameCounter;
+  FrameCounter realtimeFrameCounter;
+  FrameCounter inputFrameCounter;
 
-  void update_frames(double time_msecs) {
-    current_time_secs = time_msecs/1000.0;
-    num_frames += 1;
-    if (current_time_secs - last_frame_secs >= 1.0f) {
-      printf("%10fs %5d fps delta %10fs\n", 
-          current_time_secs, num_frames, delta_time);
-      num_frames = 0;
-      last_frame_secs = current_time_secs;
-    }
+  int _do_input;
+  int _do_physics;
+  int _do_render;
 
-    //printf("delta_time = %f\n", delta_time);
-    delta_time = current_time_secs - last_time_secs;
-    last_time_secs = current_time_secs;
+  MainContext() {
+    graphicsTimer.setIntervalMillis(1000/60.0);
+    physicsTimer.setIntervalMillis(1000/60.0);
+    inputTimer.setIntervalMillis(1000/500.0);
   }
+
+  void updateTime() {
+    realtime_ms = realtimeClock.getTimeMillis();
+    delta_ms = realtime_ms - last_time_ms;
+    last_time_ms = realtime_ms;
+
+    graphicsTimer.tickWithClock(graphicsClock);
+    physicsTimer.tickWithClock(physicsClock);
+    inputTimer.tickWithClock(realtimeClock);
+    _do_input = inputTimer.passed();
+    _do_render = graphicsTimer.passed();
+    _do_physics = physicsTimer.passed();
+
+    if (realtimeFrameCounter.tick(realtime_ms)) {
+      printf("%10.2fs l:%5.0f fps, i:%3.0f fps, r:%3.0f fps, p:%3.0f fps, delta:%8fs\n", 
+          realtime_ms/1000, 
+          realtimeFrameCounter.fps(),
+          inputFrameCounter.fps(),
+          graphicsFrameCounter.fps(),
+          physicsFrameCounter.fps(),
+          delta_ms/1000);
+    }
+  }
+
+  int do_input() { return _do_input;}
+  int do_physics() { return _do_physics;}
+  int do_render() { return _do_render;}
+  float delta_time() { return inputTimer.getIntervalMillis()/1000; };
 
   float aspect_ratio() const {
     return float(MainContext::WIDTH) / float(MainContext::HEIGHT);
@@ -180,37 +208,37 @@ void mouse_button_callback(GLFWwindow* window, int button, int action,
 void process_input(
     MainContext& context, const Input& input,  Camera* cam) {
   if (input.keys[GLFW_KEY_W]) {
-    cam->process_input(Camera::FORWARD, context.delta_time);
+    cam->process_input(Camera::FORWARD, context.delta_time());
   } else if  (input.keys[GLFW_KEY_S]) {
-    cam->process_input(Camera::BACKWARD, context.delta_time);
+    cam->process_input(Camera::BACKWARD, context.delta_time());
   }
 
   if (input.keys[GLFW_KEY_D]) {
-    cam->process_input(Camera::RIGHT, context.delta_time);
+    cam->process_input(Camera::RIGHT, context.delta_time());
   } else if  (input.keys[GLFW_KEY_A]) {
-    cam->process_input(Camera::LEFT, context.delta_time);
+    cam->process_input(Camera::LEFT, context.delta_time());
   }
   
   if (input.keys[GLFW_KEY_SPACE]) {
     if (input.shift) {
-      cam->process_input(Camera::DOWN, context.delta_time);
+      cam->process_input(Camera::DOWN, context.delta_time());
     } else {
-      cam->process_input(Camera::UP, context.delta_time);
+      cam->process_input(Camera::UP, context.delta_time());
     }
   }
 
   if (input.keys[GLFW_KEY_LEFT]) {
-    cam->process_rotate(Camera::YAW_LEFT, context.delta_time);
+    cam->process_rotate(Camera::YAW_LEFT, context.delta_time());
   } else if (input.keys[GLFW_KEY_RIGHT]) {
-    cam->process_rotate(Camera::YAW_RIGHT, context.delta_time);
+    cam->process_rotate(Camera::YAW_RIGHT, context.delta_time());
   } else if (input.keys[GLFW_KEY_UP]) {
-    cam->process_rotate(Camera::PITCH_UP, context.delta_time);
+    cam->process_rotate(Camera::PITCH_UP, context.delta_time());
   } else if (input.keys[GLFW_KEY_DOWN]) {
-    cam->process_rotate(Camera::PITCH_DOWN, context.delta_time);
+    cam->process_rotate(Camera::PITCH_DOWN, context.delta_time());
   } else if (input.keys[GLFW_KEY_PERIOD]) {
-    cam->process_rotate(Camera::ROLL_CLOCKWISE, context.delta_time);
+    cam->process_rotate(Camera::ROLL_CLOCKWISE, context.delta_time());
   } else if (input.keys[GLFW_KEY_COMMA]) {
-    cam->process_rotate(Camera::ROLL_COUNTER_CLOCKWISE, context.delta_time);
+    cam->process_rotate(Camera::ROLL_COUNTER_CLOCKWISE, context.delta_time());
   }
 
   if (input.keys[GLFW_KEY_T]) {
@@ -359,47 +387,27 @@ int main(int argc, char **argv) {
     shader.set3Float("light.position", lights[0].position.pos);
     shader.setBool("light.is_directional", false);
 
-    Timer graphicsTimer;
-    Timer physicsTimer;
-    Timer inputTimer;
-    graphicsTimer.setIntervalMillis(1000/60.0);
-    physicsTimer.setIntervalMillis(1000/60.0);
-    inputTimer.setIntervalMillis(1000/500.0);
-    VirtualClock graphicsClock;
-    VirtualClock physicsClock;
-    GlfwClock realtimeClock;
-    FrameCounter physicsFrameCounter;
-    FrameCounter graphicsFrameCounter;
-    FrameCounter realtimeFrameCounter;
 
     // Main loop
     while (!glfwWindowShouldClose(ctx.window)) {
-      double realtime_ms = realtimeClock.getTimeMillis();
-      realtimeFrameCounter.tick(realtime_ms);
-
-      graphicsTimer.tickWithClock(graphicsClock);
-      physicsTimer.tickWithClock(physicsClock);
-      inputTimer.tickWithClock(realtimeClock);
-      int do_input = inputTimer.passed();
-      int do_graphics = graphicsTimer.passed();
-      int do_physics = physicsTimer.passed();
+      ctx.updateTime();
 
       // Input
-      if (do_input) {
-        ctx.update_frames(realtime_ms);
+      if (ctx.do_input()) {
+        ctx.inputFrameCounter.tick(ctx.realtime_ms);
         process_input(ctx, *Input::get(), &cam);
       }
 
       // Physics 
-      if (do_physics) {
-        if (physicsFrameCounter.tick(realtime_ms)) {
+      if (ctx.do_physics()) {
+        if (ctx.physicsFrameCounter.tick(ctx.realtime_ms) && false) {
           printf("Do physics: fps: %f, time: %f, rate = %f \n", 
-              physicsFrameCounter.fps(),
-              physicsTimer.getCurrentMillis(), 
-              physicsClock.getRate());
+              ctx.physicsFrameCounter.fps(),
+              ctx.physicsTimer.getCurrentMillis(), 
+              ctx.physicsClock.getRate());
         }
         if (ctx.move_light) {
-          float time_secs = physicsClock.getTimeSecs();
+          float time_secs = ctx.physicsClock.getTimeSecs();
           //float time_secs = current_time_ms / 1000;
           lights[0].position.move_to(
               glm::vec3(
@@ -412,12 +420,12 @@ int main(int argc, char **argv) {
       }
 
       // Render
-      if (do_graphics) {
-        if (graphicsFrameCounter.tick(realtime_ms)) {
+      if (ctx.do_render()) {
+        if (ctx.graphicsFrameCounter.tick(ctx.realtime_ms) && false) {
           printf("Do graphics: fps: %f, time: %f, rate = %f \n", 
-              graphicsFrameCounter.fps(),
-              graphicsTimer.getCurrentMillis(), 
-              graphicsClock.getRate());
+              ctx.graphicsFrameCounter.fps(),
+              ctx.graphicsTimer.getCurrentMillis(), 
+              ctx.graphicsClock.getRate());
         }
 
         glClearColor(0,0,0,0);
