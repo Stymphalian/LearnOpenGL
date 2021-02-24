@@ -49,6 +49,8 @@ public:
 
   bool debug = false;
   bool move_light = false;
+  bool light_directional = false;
+  bool light_spotlight = false;
 
   Timer graphicsTimer;
   Timer physicsTimer;
@@ -122,6 +124,7 @@ public:
     static Input input;
     return &input;
   }
+
 private:
   Input(){
     for (int i = 0; i < 1024; i++) {
@@ -166,10 +169,12 @@ void key_callback(GLFWwindow* window, int key, int scancode,
 
   input->shift = mods & GLFW_MOD_SHIFT;
   input->ctrl = mods & GLFW_MOD_CONTROL;
-  input->prevKeys[key] = input->keys[key];
-  if (action == GLFW_PRESS) {
+
+  if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+    //input->prevKeys[key] = input->keys[key];
     input->keys[key] = true;
   } else if (action == GLFW_RELEASE) {
+    //input->prevKeys[key] = input->keys[key];
     input->keys[key] = false;
   }
 }
@@ -247,6 +252,19 @@ void process_input(
   if (input.keys[GLFW_KEY_L]) {
     context.move_light = !context.move_light;
   }
+  if (input.keys[GLFW_KEY_B]) {
+    context.light_directional = true;
+  }
+  if (input.keys[GLFW_KEY_N]) {
+    context.light_directional = false;
+  }
+  if (input.keys[GLFW_KEY_G]) {
+    context.light_spotlight = true;
+  }
+  if (input.keys[GLFW_KEY_H]) {
+    context.light_spotlight = false;
+  }
+
 
   if (input.keys[GLFW_KEY_1]) {
     cam->translator.move_to(glm::vec3(0,0,5.f));
@@ -384,9 +402,16 @@ int main(int argc, char **argv) {
     shader.set3Float("light.ambient", 0.1f, 0.1f, 0.1f);
     shader.set3Float("light.diffuse", 0.5f, 0.5f, 0.5f);
     shader.set3Float("light.specular", 1.0f, 1.0f, 1.0f);
+    shader.setFloat("light.constant", 1.0f);
+    shader.setFloat("light.linear", 0.09f);
+    shader.setFloat("light.quadratic", 0.032f);
     shader.set3Float("light.position", lights[0].position.pos);
     shader.setBool("light.is_directional", false);
-
+    shader.setBool("light.is_spotlight", false);
+    shader.set3Float("light.direction", cam.rotator.front);
+    shader.setFloat("light.innerCutoff", glm::cos(glm::radians(12.5f)));
+    //shader.setFloat("light.outerCutoff", glm::cos(glm::radians(17.5f)));
+    shader.setFloat("light.outerCutoff", glm::cos(glm::radians(32.5f)));
 
     // Main loop
     while (!glfwWindowShouldClose(ctx.window)) {
@@ -396,6 +421,15 @@ int main(int argc, char **argv) {
       if (ctx.do_input()) {
         ctx.inputFrameCounter.tick(ctx.realtime_ms);
         process_input(ctx, *Input::get(), &cam);
+      }
+
+      shader.use();
+      shader.setBool("light.is_directional", ctx.light_directional);
+      shader.setBool("light.is_spotlight", ctx.light_spotlight);
+      if (ctx.light_spotlight) {
+        lights[0].position.move_to(cam.translator.pos - 2.0f*cam.rotator.front);
+        shader.set3Float("light.position", cam.translator.pos);
+        shader.set3Float("light.direction", cam.rotator.front);
       }
 
       // Physics 

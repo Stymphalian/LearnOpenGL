@@ -17,7 +17,16 @@ struct Light {
   vec3 diffuse;
   vec3 specular;
 
+  float constant;
+  float linear;
+  float quadratic;
+
   bool is_directional;
+  
+  bool is_spotlight;
+  vec3 direction;
+  float innerCutoff;
+  float outerCutoff;
 };
 
 uniform vec3 viewPos;
@@ -32,7 +41,7 @@ void main() {
   vec3 norm = normalize(NormCoord);
   vec3 lightDir = normalize(light.position - FragPos);
   if (light.is_directional) {
-    lightDir = normalize(-light.position);
+    lightDir = normalize(light.position);
   }
 
   // ambient colouring
@@ -52,9 +61,38 @@ void main() {
 
   // emission
   vec3 emission = vec3(texture(material.emission, TexCoord));
- 
-  //vec3 result = (emission + ambient + diffuse + specular);
+
+  // attenuation
+  float dist = length(light.position - FragPos);
+  float attenuation = 1.0 / (light.constant + light.linear * dist 
+      + light.quadratic * dist *dist);
+  ambient *= attenuation;
+  diffuse *= attenuation;
+  specular *= attenuation;
+
+  // spot light calculation
+  if (light.is_spotlight) {
+    vec3 spotDir = normalize(-light.direction);
+    float lightCosTheta = dot(lightDir, spotDir);
+
+    // apply lighting thresholds if it is the outer range of the light cone
+    if (lightCosTheta < light.outerCutoff) {
+      diffuse = vec3(0,0,0);
+      specular = vec3(0,0,0);
+    } else if (lightCosTheta < light.innerCutoff) {
+      // must interpolate because we are in the inner outer cone range
+      float range = lightCosTheta - light.outerCutoff;
+      float weight = abs(light.innerCutoff  - light.outerCutoff);
+      float intensity = clamp(range / weight, 0.0, 1.0);;
+      diffuse *= intensity;
+      specular *= intensity;
+    } else {
+      // use full illumination
+    }
+  }
+
   vec3 result = (ambient + diffuse + specular);
+  //vec3 result = (emission + ambient + diffuse + specular);
   color = vec4(result, 1.0);
 
   //color = vec4(TexCoord.x, TexCoord.y, 0.0f, 1.0f);
