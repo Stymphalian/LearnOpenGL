@@ -7,7 +7,8 @@ LDFLAGS= -lglfw -lm -lGL -lGLEW -lassimp -lstdc++fs
 OBJDIR=build
 SRCDIR=src
 
-PURE_SOURCES=main.cc hand_mesh.cc object.cc misc.cc camera.cc mesh.cc point.cc cloth.cc stb_image.cc
+PURE_SOURCES=main.cc hand_mesh.cc object.cc misc.cc camera.cc mesh.cc \
+						 point.cc cloth.cc stb_image.cc time.cc
 SOURCES=$(addprefix $(SRCDIR)/, $(PURE_SOURCES) )
 OBJECTS=$(addprefix $(OBJDIR)/, $(PURE_SOURCES:.cc=.o) )
 

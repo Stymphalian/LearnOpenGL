@@ -19,6 +19,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include "time.h"
 #include "stb_image.h"
 #include "shader.h"
 #include "cloth.h"
@@ -44,28 +45,30 @@ public:
   int num_frames = 0;
   double current_time_secs = 0.0f;
   double last_time_secs = 0.0f;
-  double delta_time_secs = 0.0f;
-
+  double last_frame_secs = 0.0f;
   double delta_time = 0.0f;
-  double last_frame = 0.0f;
+
+  //double delta_time_secs = 0.0f;
+  //double last_frame = 0.0f;
 
   bool debug = false;
   bool move_light = false;
 
   MainContext() {}
 
-  void update_frames() {
+  void update_frames(double time_msecs) {
+    current_time_secs = time_msecs/1000.0;
     num_frames += 1;
-    current_time_secs = glfwGetTime();
-    if (current_time_secs - last_time_secs >= 1.0f) {
-      //printf("%10f %5d fps %10f\n", current_time_secs, num_frames, delta_time);
+    if (current_time_secs - last_frame_secs >= 1.0f) {
+      printf("%10fs %5d fps delta %10fs\n", 
+          current_time_secs, num_frames, delta_time);
       num_frames = 0;
-      delta_time_secs = current_time_secs - last_time_secs;
-      last_time_secs += 1.0f;
+      last_frame_secs = current_time_secs;
     }
 
-    delta_time = current_time_secs - last_frame;
-    last_frame = current_time_secs;
+    //printf("delta_time = %f\n", delta_time);
+    delta_time = current_time_secs - last_time_secs;
+    last_time_secs = current_time_secs;
   }
 
   float aspect_ratio() const {
@@ -76,6 +79,7 @@ public:
 class Input {
 public:
   bool keys[1024];
+  bool prevKeys[1024];
   bool shift = false;
   bool ctrl = false;
 
@@ -92,7 +96,10 @@ public:
   }
 private:
   Input(){
-    for(int i =0 ; i < 1024; i++) { keys[i] = false; }
+    for (int i = 0; i < 1024; i++) {
+      keys[i] = false;
+      prevKeys[i] = false;
+    }
   }
   ~Input(){}
 };
@@ -131,6 +138,7 @@ void key_callback(GLFWwindow* window, int key, int scancode,
 
   input->shift = mods & GLFW_MOD_SHIFT;
   input->ctrl = mods & GLFW_MOD_CONTROL;
+  input->prevKeys[key] = input->keys[key];
   if (action == GLFW_PRESS) {
     input->keys[key] = true;
   } else if (action == GLFW_RELEASE) {
@@ -351,49 +359,94 @@ int main(int argc, char **argv) {
     shader.set3Float("light.position", lights[0].position.pos);
     shader.setBool("light.is_directional", false);
 
+    Timer graphicsTimer;
+    Timer physicsTimer;
+    Timer inputTimer;
+    graphicsTimer.setIntervalMillis(1000/60.0);
+    physicsTimer.setIntervalMillis(1000/60.0);
+    inputTimer.setIntervalMillis(1000/500.0);
+    VirtualClock graphicsClock;
+    VirtualClock physicsClock;
+    GlfwClock realtimeClock;
+    FrameCounter physicsFrameCounter;
+    FrameCounter graphicsFrameCounter;
+    FrameCounter realtimeFrameCounter;
+
     // Main loop
     while (!glfwWindowShouldClose(ctx.window)) {
-      ctx.update_frames();
-      process_input(ctx, *Input::get(), &cam);
+      double realtime_ms = realtimeClock.getTimeMillis();
+      realtimeFrameCounter.tick(realtime_ms);
+
+      graphicsTimer.tickWithClock(graphicsClock);
+      physicsTimer.tickWithClock(physicsClock);
+      inputTimer.tickWithClock(realtimeClock);
+      int do_input = inputTimer.passed();
+      int do_graphics = graphicsTimer.passed();
+      int do_physics = physicsTimer.passed();
+
+      // Input
+      if (do_input) {
+        ctx.update_frames(realtime_ms);
+        process_input(ctx, *Input::get(), &cam);
+      }
 
       // Physics 
-      if (ctx.move_light) {
-        lights[0].position.move_to(
-            glm::vec3(
-              cos(ctx.current_time_secs*1.5)*2.5,
-              1.25f, 
-              sin(ctx.current_time_secs*1.5)*2.5));
-        shader.use();
-        shader.set3Float("light.position", lights[0].position.pos);
-      }
-
-      // Render
-      glClearColor(0,0,0,0);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      
-      // Draw
-      shader.use();
-      cam.use(ctx.aspect_ratio(),  &shader);
-      for (Object& obj: objects) {
-        obj.draw(shader);
-      }
-
-      // Draw lights
-      light_shader.use();
-      cam.use(ctx.aspect_ratio(),  &light_shader);
-      for (Object& obj: lights) {
-        obj.draw(light_shader);
-      }
-
-      if (ctx.debug) {
-        debug_shader.use();
-        cam.use(ctx.aspect_ratio(), &debug_shader);
-        for (Object& obj: objects) {
-          obj.draw(debug_shader);
+      if (do_physics) {
+        if (physicsFrameCounter.tick(realtime_ms)) {
+          printf("Do physics: fps: %f, time: %f, rate = %f \n", 
+              physicsFrameCounter.fps(),
+              physicsTimer.getCurrentMillis(), 
+              physicsClock.getRate());
+        }
+        if (ctx.move_light) {
+          float time_secs = physicsClock.getTimeSecs();
+          //float time_secs = current_time_ms / 1000;
+          lights[0].position.move_to(
+              glm::vec3(
+                cos(time_secs*1.5)*2.5,
+                1.25f, 
+                sin(time_secs*1.5)*2.5));
+          shader.use();
+          shader.set3Float("light.position", lights[0].position.pos);
         }
       }
 
-      glfwSwapBuffers(ctx.window);
+      // Render
+      if (do_graphics) {
+        if (graphicsFrameCounter.tick(realtime_ms)) {
+          printf("Do graphics: fps: %f, time: %f, rate = %f \n", 
+              graphicsFrameCounter.fps(),
+              graphicsTimer.getCurrentMillis(), 
+              graphicsClock.getRate());
+        }
+
+        glClearColor(0,0,0,0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Draw
+        shader.use();
+        cam.use(ctx.aspect_ratio(),  &shader);
+        for (Object& obj: objects) {
+          obj.draw(shader);
+        }
+
+        // Draw lights
+        light_shader.use();
+        cam.use(ctx.aspect_ratio(),  &light_shader);
+        for (Object& obj: lights) {
+          obj.draw(light_shader);
+        }
+
+        if (ctx.debug) {
+          debug_shader.use();
+          cam.use(ctx.aspect_ratio(), &debug_shader);
+          for (Object& obj: objects) {
+            obj.draw(debug_shader);
+          }
+        }
+        glfwSwapBuffers(ctx.window);
+      }
+
       glfwPollEvents();
     }
 

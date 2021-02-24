@@ -142,5 +142,21 @@
    "build/hand_mesh.o"
   ],
   "file": "src/hand_mesh.cc"
+ },
+ {
+  "directory": "/home/jordan/dev/lab/gl/gl",
+  "arguments": [
+   "clang++",
+   "-c",
+   "-ansi",
+   "-Wall",
+   "-std=c++17",
+   "-O3",
+   "-Iinclude",
+   "src/time.cc",
+   "-o",
+   "build/time.o"
+  ],
+  "file": "src/time.cc"
  }
 ]
