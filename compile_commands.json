@@ -158,5 +158,21 @@
    "build/time.o"
   ],
   "file": "src/time.cc"
+ },
+ {
+  "directory": "/home/jordan/dev/lab/gl/gl",
+  "arguments": [
+   "clang++",
+   "-c",
+   "-ansi",
+   "-Wall",
+   "-std=c++17",
+   "-O3",
+   "-Iinclude",
+   "src/light.cc",
+   "-o",
+   "build/light.o"
+  ],
+  "file": "src/light.cc"
  }
 ]
