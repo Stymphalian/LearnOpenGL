@@ -72,7 +72,7 @@ public:
   MainContext() {
     graphicsTimer.setIntervalMillis(1000 / 60.0);
     physicsTimer.setIntervalMillis(1000 / 60.0);
-    inputTimer.setIntervalMillis(1000 / 500.0);
+    inputTimer.setIntervalMillis(1000 / 60.0);
   }
 
   void updateTime() {
@@ -101,7 +101,8 @@ public:
   int do_render() { return _do_render; }
   float delta_time() {
     // return delta_ms;
-    return _do_input * (inputTimer.getIntervalMillis() / 1000);
+    //printf("%f\n", inputTimer.getIntervalMillis());
+    return (inputTimer.getIntervalMillis() / 1000);
   };
 
   float aspect_ratio() const {
@@ -297,6 +298,26 @@ void process_input(MainContext &context, const Input &input, Camera *cam) {
   // cam->process_mouse(x_offset, y_offset);
 }
 
+void updatePendulumSpotLights(MainContext& ctx, vector<Light>& spotLights) {
+  glm::vec3 attachPoint = glm::vec3(0, 5, 0);
+  float theta_0s[] = {25, -25, 45, 65};
+  float Ls[] = {3, 2, 0.5, 1};
+  for (int i = 0; i < spotLights.size(); i++) {
+    Light& sl = spotLights[i];
+    float t = ctx.physicsClock.getTimeSecs() * 1.5;
+    float theta_0 = glm::radians(theta_0s[i]);
+    float g = 9.81;
+    float L = Ls[i];
+    float w = glm::sqrt(g / L);
+    float theta_t = theta_0 * cos (w * t);
+
+    sl.rotation.reset();
+    sl.rotation.rotateX(90.0f);
+    sl.rotation.rotateY(glm::degrees(theta_t));
+    sl.position.move_to(attachPoint + sl.rotation.front() * L);
+  }
+}
+
 // --------------------------
 // MAIN
 // --------------------------
@@ -361,8 +382,9 @@ int main(int argc, char **argv) {
 
   // Objects and meshes
   Mesh cube = create_cube_mesh2({
-      {"material.diffuse", texture3}, {"material.specular", texture4},
-      //{"material.emission", texture5},
+      {"texture_diffuse", texture3},
+      {"texture_specular", texture4},
+      //{"texture_emission", texture5},
   });
 
   vector<Object> objects;
@@ -431,18 +453,8 @@ int main(int argc, char **argv) {
     pointLights.push_back(l);
   }
 
-  //spotLights.clear();
-  dirLights.clear();
-  pointLights.clear();
-
-  // vector<Object> lights;
-  // lights.push_back(Object(cube));
-  // lights[0].position.move_to(glm::vec3(1,1,1));
-  // lights[0].scale.scale(0.2);
-
   // Setup shaders
   shader.use();
-  shader.setFloat("material.shininess", 32.0f);
   shader.setInt("numDirLights", dirLights.size());
   shader.setInt("numSpotLights", spotLights.size());
   shader.setInt("numPointLights", pointLights.size());
@@ -475,32 +487,10 @@ int main(int argc, char **argv) {
         spotLights[0].position.move_to(
             (cam.translator.pos - 2.0f * cam.rotator.front()));
         spotLights[0].rotation = cam.rotator;
-        // TODO: Why doesn't this work?
-        // spotLights[0].rotation.lookAt(cam.rotator.front);
-        // cout << "camera: " << cam.rotator << endl;
       }
 
-      glm::vec3 attachPoint = glm::vec3(0, 5, 0);
       if (true) {
-        float theta_0s[] = {25, -25, 45, 65};
-        float Ls[] = {3, 2, 0.5, 1};
-        for (int i = 0; i < spotLights.size(); i++) {
-          Light& sl = spotLights[i];
-          float t = ctx.physicsClock.getTimeSecs() * 1.5;
-          float theta_0 = glm::radians(theta_0s[i]);
-          float g = 9.81;
-          float L = Ls[i];
-          float w = glm::sqrt(g / L);
-          float theta_t = theta_0 * cos (w * t);
-
-          //float x = glm::sin(theta_t)*L;
-          //float y = glm::cos(theta_t)*L;
-          //sl.position.move_to(glm::vec3(x, y, 0));
-          sl.rotation.reset();
-          sl.rotation.rotateX(90.0f);
-          sl.rotation.rotateY(glm::degrees(theta_t));
-          sl.position.move_to(attachPoint + sl.rotation.front() * L);
-        }
+        updatePendulumSpotLights(ctx, spotLights);
       }
 
       // Update all the lights

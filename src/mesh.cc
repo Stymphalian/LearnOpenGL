@@ -11,6 +11,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "shader.h"
+#include "misc.h"
 
 Mesh::Mesh(std::vector<Vertex> verts,
        std::vector<unsigned int> indices,
@@ -22,37 +23,30 @@ Mesh::Mesh(std::vector<Vertex> verts,
 }
 
 void Mesh::draw(Shader& shader) {
-  unsigned int diffuse_nr = 1;
-  unsigned int specular_nr = 1;
-  unsigned int material_nr = 1;
-  //unsigned int material_nr = 1;
+  unsigned int diffuse_count = 0;
+  unsigned int specular_count = 0;
+  unsigned int emission_count = 0;
   for (unsigned int i = 0; i < textures.size(); i++) {
     glActiveTexture(GL_TEXTURE0 + i);
-    std::string number;
     std::string name = textures[i].type;
     if (name == "texture_diffuse") {
-      number = std::to_string(diffuse_nr++);
-      name = name + number;
-    } else if (name == "specular_diffuse") {
-      number = std::to_string(specular_nr++);
-      name = name + number;
-    } else if (name == "material.diffuse") {
-      number = std::to_string(material_nr++);
-      //name = "material" + number + ".diffuse";
-      name = "material.diffuse";
-    } else if (name == "material.specular") {
-      number = std::to_string(material_nr++);
-      //name = "material" + number + ".specular";
-      name = "material.specular";
-    } else if (name == "material.emission") {
-      name = "material.emission";
+      name = string_format("material.diffuse_%d", diffuse_count++);
+    } else if (name == "texture_specular") {
+      name = string_format("material.specular_%d", specular_count++);
+    } else if (name == "texture_emission") {
+      name = string_format("material.emission_%d", emission_count++);
+    } else {
+      continue;
     }
 
-    //shader.setFloat(("material." + name + number).c_str(), i);
-    //shader.setInt((name + number).c_str(), i);
     shader.setInt(name.c_str(), i);
     glBindTexture(GL_TEXTURE_2D, textures[i].id);
   }
+  shader.setFloat("material.shininess", 32.0f);
+  shader.setInt("material.numDiffuse", diffuse_count);
+  shader.setInt("material.numSpecular", specular_count);
+  shader.setInt("material.numEmission", emission_count);
+
   glActiveTexture(GL_TEXTURE0);
 
   glBindVertexArray(vao);

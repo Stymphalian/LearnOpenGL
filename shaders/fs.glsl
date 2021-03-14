@@ -4,18 +4,44 @@ in vec3 FragPos;
 in vec3 NormCoord;
 in vec2 TexCoord;
 
+#define NUMBER_OF_LIGHTS 5
+#define NUMBER_OF_TEXTURES 5
+
 struct Material {
-  sampler2D diffuse;
-  sampler2D specular;
-  sampler2D emission;
+  sampler2D diffuse_0;
+  sampler2D diffuse_1;
+  sampler2D diffuse_2;
+  sampler2D diffuse_3;
+  sampler2D diffuse_4;
+
+  sampler2D specular_0;
+  sampler2D specular_1;
+  sampler2D specular_2;
+  sampler2D specular_3;
+  sampler2D specular_4;
+
+  sampler2D emission_0;
+  sampler2D emission_1;
+  sampler2D emission_2;
+  sampler2D emission_3;
+  sampler2D emission_4;
+
   float shininess;
+
+  int numDiffuse;
+  int numSpecular;
+  int numEmission;
 };
 
 struct MaterialTexture {
-  vec3 diffuse;
-  vec3 specular;
-  vec3 emission;
+  vec3 diffuse[NUMBER_OF_TEXTURES];
+  vec3 specular[NUMBER_OF_TEXTURES];
+  vec3 emission[NUMBER_OF_TEXTURES];
   float shininess;
+
+  int numDiffuse;
+  int numSpecular;
+  int numEmission;
 };
 
 struct LightContext {
@@ -58,16 +84,12 @@ struct SpotLight {
 uniform vec3 viewPos;
 uniform Material material;
 
-#define NUMBER_OF_LIGHTS 5
 uniform DirectionalLight directionalLights[NUMBER_OF_LIGHTS];
 uniform PointLight pointLights[NUMBER_OF_LIGHTS];
 uniform SpotLight spotLights[NUMBER_OF_LIGHTS];
 uniform int numDirLights;
 uniform int numPointLights;
 uniform int numSpotLights;
-
-// uniform sampler2D texture_diffuse1;
-// uniform sampler2D texture_diffuse2;
 
 MaterialTexture getMaterialTexture(Material m);
 LightColor calculateLightColor(LightColor l, LightContext c, vec3 lightDir);
@@ -84,6 +106,7 @@ void main() {
   context.m = getMaterialTexture(material);
 
   vec3 result = vec3(0.0f);
+
   // calculate all directional lights
   for (int i = 0; i < min(numDirLights, NUMBER_OF_LIGHTS); i++) {
     LightColor r = calculateDirectionalLight(directionalLights[i], context);
@@ -99,29 +122,69 @@ void main() {
     LightColor r = calculateSpotLight(spotLights[i], context);
     result += (r.ambient + r.diffuse + r.specular);
   }
+  // calculate emission light from material
+  //for (int i = 0; i < min(context.m.numEmission, NUMBER_OF_TEXTURES); i++) {
+    //result += context.m.emission[i];
+  //}
+
   color = vec4(result, 1.0);
 }
 
 MaterialTexture getMaterialTexture(Material m) {
   MaterialTexture t;
-  t.diffuse = vec3(texture(m.diffuse, TexCoord));
-  t.specular = vec3(texture(m.specular, TexCoord));
-  t.emission = vec3(texture(m.emission, TexCoord));
+  if (m.numDiffuse >= 1) { t.diffuse[0] = vec3(texture(m.diffuse_0, TexCoord)); }
+  if (m.numDiffuse >= 2) { t.diffuse[1] = vec3(texture(m.diffuse_1, TexCoord)); }
+  if (m.numDiffuse >= 3) { t.diffuse[2] = vec3(texture(m.diffuse_2, TexCoord)); }
+  if (m.numDiffuse >= 4) { t.diffuse[3] = vec3(texture(m.diffuse_3, TexCoord)); }
+  if (m.numDiffuse >= 5) { t.diffuse[4] = vec3(texture(m.diffuse_4, TexCoord)); }
+
+  if (m.numSpecular >= 1) { t.specular[0] = vec3(texture(m.specular_0, TexCoord)); }
+  if (m.numSpecular >= 2) { t.specular[1] = vec3(texture(m.specular_1, TexCoord)); }
+  if (m.numSpecular >= 3) { t.specular[2] = vec3(texture(m.specular_2, TexCoord)); }
+  if (m.numSpecular >= 4) { t.specular[3] = vec3(texture(m.specular_3, TexCoord)); }
+  if (m.numSpecular >= 5) { t.specular[4] = vec3(texture(m.specular_4, TexCoord)); }
+
+  if (m.numEmission >= 1) { t.emission[0] = vec3(texture(m.emission_0, TexCoord)); }
+  if (m.numEmission >= 2) { t.emission[1] = vec3(texture(m.emission_1, TexCoord)); }
+  if (m.numEmission >= 3) { t.emission[2] = vec3(texture(m.emission_2, TexCoord)); }
+  if (m.numEmission >= 4) { t.emission[3] = vec3(texture(m.emission_3, TexCoord)); }
+  if (m.numEmission >= 5) { t.emission[4] = vec3(texture(m.emission_4, TexCoord)); }
+
+  //t.diffuse = vec3(texture(m.diffuse, TexCoord));
+  //t.specular = vec3(texture(m.specular, TexCoord));
+  //t.emission = vec3(texture(m.emission, TexCoord));
+
   t.shininess = m.shininess;
+
+  t.numDiffuse = m.numDiffuse;
+  t.numSpecular = m.numSpecular;
+  t.numEmission = m.numEmission;
   return t;
 }
 
 LightColor calculateLightColor(LightColor l, LightContext c, vec3 lightDir) {
   LightColor result;
+  result.ambient = vec3(0,0,0);
+  result.diffuse = vec3(0,0,0);
+  result.specular = vec3(0,0,0);
+
   // ambient colouring
-  result.ambient = l.ambient * c.m.diffuse;
+  for (int i = 0; i < c.m.numDiffuse; i++) {
+    result.ambient += (l.ambient * c.m.diffuse[i]);
+  }
+
   // diffuse colouring
   float diff = max(dot(c.normal, lightDir), 0.0);
-  result.diffuse = l.diffuse * (diff * c.m.diffuse);
+  for (int i = 0; i < c.m.numDiffuse; i++) {
+    result.diffuse += (l.diffuse * (diff * c.m.diffuse[i]));
+  }
+
   // specular lighting
   vec3 reflectDir = reflect(-lightDir, c.normal);
   float spec = pow(max(dot(c.viewDir, reflectDir), 0.0), c.m.shininess);
-  result.specular = l.specular * (spec * c.m.specular);
+  for (int i = 0; i < c.m.numSpecular; i++) {
+    result.specular += (l.specular * (spec * c.m.specular[i]));
+  }
 
   return result;
 }
