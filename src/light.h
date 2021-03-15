@@ -2,7 +2,8 @@
 
 #include <glm/glm.hpp>
 
-#include "mesh.h"
+//#include "mesh.h"
+#include "model.h"
 #include "object.h"
 #include "shader.h"
 
@@ -31,7 +32,7 @@ public:
   float innerCutoff = glm::cos(glm::radians(12.5f));
   float outerCutoff = glm::cos(glm::radians(17.5f));
 
-  Light(Mesh& mesh, LIGHT_TYPE_E type=POINT): Object(mesh), type(type) {}
+  Light(Model& model, LIGHT_TYPE_E type=POINT): Object(model), type(type) {}
   void use(Shader *shader, int lightIndex);
 
   glm::vec3 getPosition() { return position.pos;}

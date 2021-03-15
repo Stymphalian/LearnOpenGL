@@ -176,13 +176,13 @@ glm::mat4 Scaler::matrix(glm::mat4 model) {
 }
 
 void Object::draw(Shader &shader) {
-  glm::mat4 model = glm::mat4(1.0f);
-  model = position.matrix(model);
-  model = rotation.matrix(model);
-  model = scale.matrix(model);
-  // model = scale.matrix(model);
+  glm::mat4 modelMat = glm::mat4(1.0f);
+  modelMat = position.matrix(modelMat);
+  modelMat = rotation.matrix(modelMat);
+  modelMat = scale.matrix(modelMat);
+  // modelMat = scale.matrix(modelMat);
 
-  shader.setMat4("model", model);
-  shader.setMat4("inv_model", glm::inverse(model));
-  mesh.draw(shader);
+  shader.setMat4("model", modelMat);
+  shader.setMat4("inv_model", glm::inverse(modelMat));
+  model.draw(shader);
 }

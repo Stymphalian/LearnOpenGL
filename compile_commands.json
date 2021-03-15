@@ -174,5 +174,21 @@
    "build/light.o"
   ],
   "file": "src/light.cc"
+ },
+ {
+  "directory": "/home/jordan/dev/lab/gl/gl",
+  "arguments": [
+   "clang++",
+   "-c",
+   "-ansi",
+   "-Wall",
+   "-std=c++17",
+   "-O3",
+   "-Iinclude",
+   "src/model.cc",
+   "-o",
+   "build/model.o"
+  ],
+  "file": "src/model.cc"
  }
 ]

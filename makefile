@@ -1,6 +1,7 @@
 CXX=clang++
 CTYPE=cc
 CFLAGS=-c -ansi -Wall -std=c++17 -O3
+#CFLAGS=-c -ansi -Wall -std=c++17 -g
 INFLAGS=-Iinclude
 LDFLAGS= -lglfw -lm -lGL -lGLEW -lassimp -lstdc++fs
 
@@ -8,7 +9,7 @@ OBJDIR=build
 SRCDIR=src
 
 PURE_SOURCES=main.cc hand_mesh.cc object.cc misc.cc camera.cc mesh.cc \
-						 point.cc cloth.cc stb_image.cc time.cc light.cc
+						 point.cc cloth.cc stb_image.cc time.cc light.cc model.cc
 SOURCES=$(addprefix $(SRCDIR)/, $(PURE_SOURCES) )
 OBJECTS=$(addprefix $(OBJDIR)/, $(PURE_SOURCES:.cc=.o) )
 

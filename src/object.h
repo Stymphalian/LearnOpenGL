@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "mesh.h"
+#include "model.h"
 #include "shader.h"
 
 class Basis {
@@ -109,12 +110,12 @@ public:
 
 class Object {
 public:
-  Mesh &mesh;
+  Model &model;
   Translator position;
   Rotator rotation;
   Scaler scale;
 
-  Object(Mesh &mesh) : mesh(mesh) {}
+  Object(Model &model) : model(model) {}
 
   void draw(Shader &shader);
 };

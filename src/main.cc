@@ -25,8 +25,9 @@
 #include "hand_mesh.h"
 #include "light.h"
 #include "mesh.h"
-#include "misc.h"
+#include "model.h"
 #include "object.h"
+#include "misc.h"
 #include "shader.h"
 #include "stb_image.h"
 #include "time.h"
@@ -70,9 +71,9 @@ public:
   int _do_render;
 
   MainContext() {
-    graphicsTimer.setIntervalMillis(1000 / 60.0);
-    physicsTimer.setIntervalMillis(1000 / 60.0);
-    inputTimer.setIntervalMillis(1000 / 60.0);
+    graphicsTimer.setIntervalMillis(1000 / 30.0);
+    physicsTimer.setIntervalMillis(1000 / 30.0);
+    inputTimer.setIntervalMillis(1000 / 30.0);
   }
 
   void updateTime() {
@@ -381,11 +382,13 @@ int main(int argc, char **argv) {
   unsigned int texture5 = load_texture("res/matrix.jpg");
 
   // Objects and meshes
-  Mesh cube = create_cube_mesh2({
+  Mesh cubeMesh = create_cube_mesh2({
       {"texture_diffuse", texture3},
       {"texture_specular", texture4},
       //{"texture_emission", texture5},
   });
+  Model cube = Model(cubeMesh);
+  Model backpack = Model("res/backpack/backpack.obj");
 
   vector<Object> objects;
   glm::vec3 cubePositions[] = {
@@ -395,14 +398,15 @@ int main(int argc, char **argv) {
       glm::vec3(1.3f, -2.0f, -2.5f),  glm::vec3(1.5f, 2.0f, -2.5f),
       glm::vec3(1.5f, 0.2f, -1.5f),   glm::vec3(-1.3f, 1.0f, -1.5f)};
   for (int i = 0; i < 10; i++) {
+    //Object o = Object(cube);
     Object o = Object(cube);
     o.position.move_to(cubePositions[i]);
     float angle = 20.0f * i;
     o.rotation.rotate(glm::vec3(1.0f, 0.3f, 0.5f), angle);
     objects.push_back(o);
   }
-  //objects.clear();
-  //objects.push_back(Object(cube));
+  objects.clear();
+  objects.push_back(Object(backpack));
   //objects.push_back(Object(cube));
   //objects.push_back(Object(cube));
   //objects.push_back(Object(cube));
@@ -441,7 +445,7 @@ int main(int argc, char **argv) {
   spotLights[3].scale.scale(0.1);
   //spotLights[0].position.move_to(glm::vec3(0, 1.5, 0));
   //spotLights[0].rotation.rotateX(90.0f);
-
+  
   glm::vec3 pointLightPositions[] = {
       glm::vec3(1, 1, 1), glm::vec3(0.7f, 0.2f, 2.0f),
       glm::vec3(2.3f, -3.3f, -4.0f), glm::vec3(-4.0f, 2.0f, -12.0f),
@@ -452,6 +456,10 @@ int main(int argc, char **argv) {
     l.scale.scale(0.1);
     pointLights.push_back(l);
   }
+
+  //dirLights.clear();
+  //spotLights.clear();
+  //pointLights.clear();
 
   // Setup shaders
   shader.use();

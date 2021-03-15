@@ -123,9 +123,9 @@ void main() {
     result += (r.ambient + r.diffuse + r.specular);
   }
   // calculate emission light from material
-  //for (int i = 0; i < min(context.m.numEmission, NUMBER_OF_TEXTURES); i++) {
-    //result += context.m.emission[i];
-  //}
+  for (int i = 0; i < min(context.m.numEmission, NUMBER_OF_TEXTURES); i++) {
+    result += context.m.emission[i];
+  }
 
   color = vec4(result, 1.0);
 }

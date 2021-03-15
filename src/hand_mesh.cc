@@ -52,7 +52,7 @@ vector<glm::vec3> calculate_vertex_normals(
 Mesh create_cube_mesh(std::vector<unsigned int> texs) {
   vector<Texture> textures;
   for (unsigned int t: texs) {
-    textures.push_back({t, "texture_diffuse"});
+    textures.push_back(Texture(t, "texture_diffuse"));
   }
 
   vector<Vertex> cube = {
