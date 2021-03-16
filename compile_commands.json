@@ -3,15 +3,19 @@
   "directory": "/home/jordan/dev/lab/gl/gl",
   "arguments": [
    "clang++",
-   "-c",
-   "-ansi",
+   "-I./",
+   "-I./include",
+   "-I./third_party/imgui",
+   "-I./third_party/imgui/backends",
+   "-g",
    "-Wall",
+   "-Wformat",
    "-std=c++17",
    "-O3",
-   "-Iinclude",
-   "src/main.cc",
+   "-c",
    "-o",
-   "build/main.o"
+   "build/main.o",
+   "src/main.cc"
   ],
   "file": "src/main.cc"
  },
@@ -19,127 +23,19 @@
   "directory": "/home/jordan/dev/lab/gl/gl",
   "arguments": [
    "clang++",
-   "-c",
-   "-ansi",
+   "-I./",
+   "-I./include",
+   "-I./third_party/imgui",
+   "-I./third_party/imgui/backends",
+   "-g",
    "-Wall",
+   "-Wformat",
    "-std=c++17",
    "-O3",
-   "-Iinclude",
-   "src/cloth.cc",
-   "-o",
-   "build/cloth.o"
-  ],
-  "file": "src/cloth.cc"
- },
- {
-  "directory": "/home/jordan/dev/lab/gl/gl",
-  "arguments": [
-   "clang++",
    "-c",
-   "-ansi",
-   "-Wall",
-   "-std=c++17",
-   "-O3",
-   "-Iinclude",
-   "src/point.cc",
    "-o",
-   "build/point.o"
-  ],
-  "file": "src/point.cc"
- },
- {
-  "directory": "/home/jordan/dev/lab/gl/gl",
-  "arguments": [
-   "clang++",
-   "-c",
-   "-ansi",
-   "-Wall",
-   "-std=c++17",
-   "-O3",
-   "-Iinclude",
-   "src/mesh.cc",
-   "-o",
-   "build/mesh.o"
-  ],
-  "file": "src/mesh.cc"
- },
- {
-  "directory": "/home/jordan/dev/lab/gl/gl",
-  "arguments": [
-   "clang++",
-   "-c",
-   "-ansi",
-   "-Wall",
-   "-std=c++17",
-   "-O3",
-   "-Iinclude",
-   "src/stb_image.cc",
-   "-o",
-   "build/stb_image.o"
-  ],
-  "file": "src/stb_image.cc"
- },
- {
-  "directory": "/home/jordan/dev/lab/gl/gl",
-  "arguments": [
-   "clang++",
-   "-c",
-   "-ansi",
-   "-Wall",
-   "-std=c++17",
-   "-O3",
-   "-Iinclude",
-   "src/camera.cc",
-   "-o",
-   "build/camera.o"
-  ],
-  "file": "src/camera.cc"
- },
- {
-  "directory": "/home/jordan/dev/lab/gl/gl",
-  "arguments": [
-   "clang++",
-   "-c",
-   "-ansi",
-   "-Wall",
-   "-std=c++17",
-   "-O3",
-   "-Iinclude",
-   "src/misc.cc",
-   "-o",
-   "build/misc.o"
-  ],
-  "file": "src/misc.cc"
- },
- {
-  "directory": "/home/jordan/dev/lab/gl/gl",
-  "arguments": [
-   "clang++",
-   "-c",
-   "-ansi",
-   "-Wall",
-   "-std=c++17",
-   "-O3",
-   "-Iinclude",
-   "src/object.cc",
-   "-o",
-   "build/object.o"
-  ],
-  "file": "src/object.cc"
- },
- {
-  "directory": "/home/jordan/dev/lab/gl/gl",
-  "arguments": [
-   "clang++",
-   "-c",
-   "-ansi",
-   "-Wall",
-   "-std=c++17",
-   "-O3",
-   "-Iinclude",
-   "src/hand_mesh.cc",
-   "-o",
-   "build/hand_mesh.o"
+   "build/hand_mesh.o",
+   "src/hand_mesh.cc"
   ],
   "file": "src/hand_mesh.cc"
  },
@@ -147,15 +43,159 @@
   "directory": "/home/jordan/dev/lab/gl/gl",
   "arguments": [
    "clang++",
-   "-c",
-   "-ansi",
+   "-I./",
+   "-I./include",
+   "-I./third_party/imgui",
+   "-I./third_party/imgui/backends",
+   "-g",
    "-Wall",
+   "-Wformat",
    "-std=c++17",
    "-O3",
-   "-Iinclude",
-   "src/time.cc",
+   "-c",
    "-o",
-   "build/time.o"
+   "build/object.o",
+   "src/object.cc"
+  ],
+  "file": "src/object.cc"
+ },
+ {
+  "directory": "/home/jordan/dev/lab/gl/gl",
+  "arguments": [
+   "clang++",
+   "-I./",
+   "-I./include",
+   "-I./third_party/imgui",
+   "-I./third_party/imgui/backends",
+   "-g",
+   "-Wall",
+   "-Wformat",
+   "-std=c++17",
+   "-O3",
+   "-c",
+   "-o",
+   "build/misc.o",
+   "src/misc.cc"
+  ],
+  "file": "src/misc.cc"
+ },
+ {
+  "directory": "/home/jordan/dev/lab/gl/gl",
+  "arguments": [
+   "clang++",
+   "-I./",
+   "-I./include",
+   "-I./third_party/imgui",
+   "-I./third_party/imgui/backends",
+   "-g",
+   "-Wall",
+   "-Wformat",
+   "-std=c++17",
+   "-O3",
+   "-c",
+   "-o",
+   "build/camera.o",
+   "src/camera.cc"
+  ],
+  "file": "src/camera.cc"
+ },
+ {
+  "directory": "/home/jordan/dev/lab/gl/gl",
+  "arguments": [
+   "clang++",
+   "-I./",
+   "-I./include",
+   "-I./third_party/imgui",
+   "-I./third_party/imgui/backends",
+   "-g",
+   "-Wall",
+   "-Wformat",
+   "-std=c++17",
+   "-O3",
+   "-c",
+   "-o",
+   "build/mesh.o",
+   "src/mesh.cc"
+  ],
+  "file": "src/mesh.cc"
+ },
+ {
+  "directory": "/home/jordan/dev/lab/gl/gl",
+  "arguments": [
+   "clang++",
+   "-I./",
+   "-I./include",
+   "-I./third_party/imgui",
+   "-I./third_party/imgui/backends",
+   "-g",
+   "-Wall",
+   "-Wformat",
+   "-std=c++17",
+   "-O3",
+   "-c",
+   "-o",
+   "build/point.o",
+   "src/point.cc"
+  ],
+  "file": "src/point.cc"
+ },
+ {
+  "directory": "/home/jordan/dev/lab/gl/gl",
+  "arguments": [
+   "clang++",
+   "-I./",
+   "-I./include",
+   "-I./third_party/imgui",
+   "-I./third_party/imgui/backends",
+   "-g",
+   "-Wall",
+   "-Wformat",
+   "-std=c++17",
+   "-O3",
+   "-c",
+   "-o",
+   "build/cloth.o",
+   "src/cloth.cc"
+  ],
+  "file": "src/cloth.cc"
+ },
+ {
+  "directory": "/home/jordan/dev/lab/gl/gl",
+  "arguments": [
+   "clang++",
+   "-I./",
+   "-I./include",
+   "-I./third_party/imgui",
+   "-I./third_party/imgui/backends",
+   "-g",
+   "-Wall",
+   "-Wformat",
+   "-std=c++17",
+   "-O3",
+   "-c",
+   "-o",
+   "build/stb_image.o",
+   "src/stb_image.cc"
+  ],
+  "file": "src/stb_image.cc"
+ },
+ {
+  "directory": "/home/jordan/dev/lab/gl/gl",
+  "arguments": [
+   "clang++",
+   "-I./",
+   "-I./include",
+   "-I./third_party/imgui",
+   "-I./third_party/imgui/backends",
+   "-g",
+   "-Wall",
+   "-Wformat",
+   "-std=c++17",
+   "-O3",
+   "-c",
+   "-o",
+   "build/time.o",
+   "src/time.cc"
   ],
   "file": "src/time.cc"
  },
@@ -163,15 +203,19 @@
   "directory": "/home/jordan/dev/lab/gl/gl",
   "arguments": [
    "clang++",
-   "-c",
-   "-ansi",
+   "-I./",
+   "-I./include",
+   "-I./third_party/imgui",
+   "-I./third_party/imgui/backends",
+   "-g",
    "-Wall",
+   "-Wformat",
    "-std=c++17",
    "-O3",
-   "-Iinclude",
-   "src/light.cc",
+   "-c",
    "-o",
-   "build/light.o"
+   "build/light.o",
+   "src/light.cc"
   ],
   "file": "src/light.cc"
  },
@@ -179,16 +223,140 @@
   "directory": "/home/jordan/dev/lab/gl/gl",
   "arguments": [
    "clang++",
-   "-c",
-   "-ansi",
+   "-I./",
+   "-I./include",
+   "-I./third_party/imgui",
+   "-I./third_party/imgui/backends",
+   "-g",
    "-Wall",
+   "-Wformat",
    "-std=c++17",
    "-O3",
-   "-Iinclude",
-   "src/model.cc",
+   "-c",
    "-o",
-   "build/model.o"
+   "build/model.o",
+   "src/model.cc"
   ],
   "file": "src/model.cc"
+ },
+ {
+  "directory": "/home/jordan/dev/lab/gl/gl",
+  "arguments": [
+   "clang++",
+   "-I./",
+   "-I./include",
+   "-I./third_party/imgui",
+   "-I./third_party/imgui/backends",
+   "-g",
+   "-Wall",
+   "-Wformat",
+   "-std=c++17",
+   "-O3",
+   "-c",
+   "-o",
+   "build/third_party/imgui/imgui.o",
+   "third_party/imgui/imgui.cpp"
+  ],
+  "file": "third_party/imgui/imgui.cpp"
+ },
+ {
+  "directory": "/home/jordan/dev/lab/gl/gl",
+  "arguments": [
+   "clang++",
+   "-I./",
+   "-I./include",
+   "-I./third_party/imgui",
+   "-I./third_party/imgui/backends",
+   "-g",
+   "-Wall",
+   "-Wformat",
+   "-std=c++17",
+   "-O3",
+   "-c",
+   "-o",
+   "build/third_party/imgui/imgui_draw.o",
+   "third_party/imgui/imgui_draw.cpp"
+  ],
+  "file": "third_party/imgui/imgui_draw.cpp"
+ },
+ {
+  "directory": "/home/jordan/dev/lab/gl/gl",
+  "arguments": [
+   "clang++",
+   "-I./",
+   "-I./include",
+   "-I./third_party/imgui",
+   "-I./third_party/imgui/backends",
+   "-g",
+   "-Wall",
+   "-Wformat",
+   "-std=c++17",
+   "-O3",
+   "-c",
+   "-o",
+   "build/third_party/imgui/imgui_tables.o",
+   "third_party/imgui/imgui_tables.cpp"
+  ],
+  "file": "third_party/imgui/imgui_tables.cpp"
+ },
+ {
+  "directory": "/home/jordan/dev/lab/gl/gl",
+  "arguments": [
+   "clang++",
+   "-I./",
+   "-I./include",
+   "-I./third_party/imgui",
+   "-I./third_party/imgui/backends",
+   "-g",
+   "-Wall",
+   "-Wformat",
+   "-std=c++17",
+   "-O3",
+   "-c",
+   "-o",
+   "build/third_party/imgui/imgui_widgets.o",
+   "third_party/imgui/imgui_widgets.cpp"
+  ],
+  "file": "third_party/imgui/imgui_widgets.cpp"
+ },
+ {
+  "directory": "/home/jordan/dev/lab/gl/gl",
+  "arguments": [
+   "clang++",
+   "-I./",
+   "-I./include",
+   "-I./third_party/imgui",
+   "-I./third_party/imgui/backends",
+   "-g",
+   "-Wall",
+   "-Wformat",
+   "-std=c++17",
+   "-O3",
+   "-c",
+   "-o",
+   "build/third_party/imgui/backends/imgui_impl_glfw.o",
+   "third_party/imgui/backends/imgui_impl_glfw.cpp"
+  ],
+  "file": "third_party/imgui/backends/imgui_impl_glfw.cpp"
+ },
+ {
+  "directory": "/home/jordan/dev/lab/gl/gl",
+  "arguments": [
+   "clang++",
+   "-I./",
+   "-I./include",
+   "-I./third_party/imgui",
+   "-I./third_party/imgui/backends",
+   "-g",
+   "-Wall",
+   "-Wformat",
+   "-std=c++17",
+   "-O3",
+   "-c",
+   "-o",
+   "build/third_party/imgui/backends/imgui_impl_opengl3.o",
+   "third_party/imgui/backends/imgui_impl_opengl3.cpp"
+  ],
+  "file": "third_party/imgui/backends/imgui_impl_opengl3.cpp"
  }
 ]

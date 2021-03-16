@@ -5,6 +5,10 @@
 #include <memory>
 #include <vector>
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -25,9 +29,9 @@
 #include "hand_mesh.h"
 #include "light.h"
 #include "mesh.h"
+#include "misc.h"
 #include "model.h"
 #include "object.h"
-#include "misc.h"
 #include "shader.h"
 #include "stb_image.h"
 #include "time.h"
@@ -102,7 +106,7 @@ public:
   int do_render() { return _do_render; }
   float delta_time() {
     // return delta_ms;
-    //printf("%f\n", inputTimer.getIntervalMillis());
+    // printf("%f\n", inputTimer.getIntervalMillis());
     return (inputTimer.getIntervalMillis() / 1000);
   };
 
@@ -299,18 +303,18 @@ void process_input(MainContext &context, const Input &input, Camera *cam) {
   // cam->process_mouse(x_offset, y_offset);
 }
 
-void updatePendulumSpotLights(MainContext& ctx, vector<Light>& spotLights) {
+void updatePendulumSpotLights(MainContext &ctx, vector<Light> &spotLights) {
   glm::vec3 attachPoint = glm::vec3(0, 5, 0);
   float theta_0s[] = {25, -25, 45, 65};
   float Ls[] = {3, 2, 0.5, 1};
   for (int i = 0; i < spotLights.size(); i++) {
-    Light& sl = spotLights[i];
+    Light &sl = spotLights[i];
     float t = ctx.physicsClock.getTimeSecs() * 1.5;
     float theta_0 = glm::radians(theta_0s[i]);
     float g = 9.81;
     float L = Ls[i];
     float w = glm::sqrt(g / L);
-    float theta_t = theta_0 * cos (w * t);
+    float theta_t = theta_0 * cos(w * t);
 
     sl.rotation.reset();
     sl.rotation.rotateX(90.0f);
@@ -329,6 +333,8 @@ int main(int argc, char **argv) {
     getchar();
     return -1;
   }
+
+  const char *glsl_version = "#version 130";
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -358,6 +364,14 @@ int main(int argc, char **argv) {
     return -1;
   }
 
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGuiIO &io = ImGui::GetIO();
+  (void)io;
+  ImGui::StyleColorsDark();
+  ImGui_ImplGlfw_InitForOpenGL(ctx.window, true);
+  ImGui_ImplOpenGL3_Init(glsl_version);
+
   // Viewport
   glViewport(0, 0, MainContext::WIDTH, MainContext::HEIGHT);
   glEnable(GL_DEPTH_TEST);
@@ -383,8 +397,7 @@ int main(int argc, char **argv) {
 
   // Objects and meshes
   Mesh cubeMesh = create_cube_mesh2({
-      {"texture_diffuse", texture3},
-      {"texture_specular", texture4},
+      {"texture_diffuse", texture3}, {"texture_specular", texture4},
       //{"texture_emission", texture5},
   });
   Model cube = Model(cubeMesh);
@@ -398,33 +411,33 @@ int main(int argc, char **argv) {
       glm::vec3(1.3f, -2.0f, -2.5f),  glm::vec3(1.5f, 2.0f, -2.5f),
       glm::vec3(1.5f, 0.2f, -1.5f),   glm::vec3(-1.3f, 1.0f, -1.5f)};
   for (int i = 0; i < 10; i++) {
-    //Object o = Object(cube);
+    // Object o = Object(cube);
     Object o = Object(cube);
     o.position.move_to(cubePositions[i]);
     float angle = 20.0f * i;
     o.rotation.rotate(glm::vec3(1.0f, 0.3f, 0.5f), angle);
     objects.push_back(o);
   }
-  objects.clear();
-  objects.push_back(Object(backpack));
-  //objects.push_back(Object(cube));
-  //objects.push_back(Object(cube));
-  //objects.push_back(Object(cube));
-  //objects[0].position.move_to(glm::vec3(3, 0, 0));
-  //objects[1].position.move_to(glm::vec3(-3, 0, 0));
-  //objects[2].position.move_to(glm::vec3(0, 0, 3));
-  //objects[3].position.move_to(glm::vec3(0, 0, -3));
-  //objects.clear();
-  //objects.push_back(Object(cube));
-  //objects.push_back(Object(cube));
-  //objects.push_back(Object(cube));
-  //objects.push_back(Object(cube));
-  //objects[1].position.move_to(glm::vec3(1,0,0));
-  //objects[1].rotation.rotateX(20);
-  //objects[2].position.move_to(glm::vec3(2,0,0));
-  //objects[2].rotation.rotateY(20);
-  //objects[3].position.move_to(glm::vec3(3,0,0));
-  //objects[3].rotation.rotateZ(20);
+  // objects.clear();
+  // objects.push_back(Object(backpack));
+  // objects.push_back(Object(cube));
+  // objects.push_back(Object(cube));
+  // objects.push_back(Object(cube));
+  // objects[0].position.move_to(glm::vec3(3, 0, 0));
+  // objects[1].position.move_to(glm::vec3(-3, 0, 0));
+  // objects[2].position.move_to(glm::vec3(0, 0, 3));
+  // objects[3].position.move_to(glm::vec3(0, 0, -3));
+  // objects.clear();
+  // objects.push_back(Object(cube));
+  // objects.push_back(Object(cube));
+  // objects.push_back(Object(cube));
+  // objects.push_back(Object(cube));
+  // objects[1].position.move_to(glm::vec3(1,0,0));
+  // objects[1].rotation.rotateX(20);
+  // objects[2].position.move_to(glm::vec3(2,0,0));
+  // objects[2].rotation.rotateY(20);
+  // objects[3].position.move_to(glm::vec3(3,0,0));
+  // objects[3].rotation.rotateZ(20);
 
   vector<Light> dirLights;
   vector<Light> spotLights;
@@ -443,9 +456,9 @@ int main(int argc, char **argv) {
   spotLights[1].scale.scale(0.1);
   spotLights[2].scale.scale(0.1);
   spotLights[3].scale.scale(0.1);
-  //spotLights[0].position.move_to(glm::vec3(0, 1.5, 0));
-  //spotLights[0].rotation.rotateX(90.0f);
-  
+  // spotLights[0].position.move_to(glm::vec3(0, 1.5, 0));
+  // spotLights[0].rotation.rotateX(90.0f);
+
   glm::vec3 pointLightPositions[] = {
       glm::vec3(1, 1, 1), glm::vec3(0.7f, 0.2f, 2.0f),
       glm::vec3(2.3f, -3.3f, -4.0f), glm::vec3(-4.0f, 2.0f, -12.0f),
@@ -457,9 +470,9 @@ int main(int argc, char **argv) {
     pointLights.push_back(l);
   }
 
-  //dirLights.clear();
-  //spotLights.clear();
-  //pointLights.clear();
+  // dirLights.clear();
+  // spotLights.clear();
+  // pointLights.clear();
 
   // Setup shaders
   shader.use();
@@ -467,10 +480,12 @@ int main(int argc, char **argv) {
   shader.setInt("numSpotLights", spotLights.size());
   shader.setInt("numPointLights", pointLights.size());
 
+  bool show_demo_window = true;
+
   // Main loop
   while (!glfwWindowShouldClose(ctx.window)) {
     ctx.updateTime();
-    //cout << cam.rotator << endl;
+    // cout << cam.rotator << endl;
 
     // Input
     if (ctx.do_input()) {
@@ -525,8 +540,22 @@ int main(int argc, char **argv) {
       glClearColor(0, 0, 0, 0);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
       // Draw
+      ImGui_ImplOpenGL3_NewFrame();
+      ImGui_ImplGlfw_NewFrame();
+      ImGui::NewFrame();
+
+      if (show_demo_window) {
+        ImGui::Begin("Hello World");
+        ImGui::Text("This is text.");
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
+                    1000.0f / ImGui::GetIO().Framerate,
+                    ImGui::GetIO().Framerate);
+        ImGui::End();
+      }
+
+      ImGui::Render();
+
       shader.use();
       cam.use(ctx.aspect_ratio(), &shader);
       for (Object &obj : objects) {
@@ -536,13 +565,13 @@ int main(int argc, char **argv) {
       // Draw lights
       light_shader.use();
       cam.use(ctx.aspect_ratio(), &light_shader);
-      for (Object &obj : pointLights) {
+      for (Light &obj : pointLights) {
         obj.draw(light_shader);
       }
-      for (Object &obj : spotLights) {
+      for (Light &obj : spotLights) {
         obj.draw(light_shader);
       }
-      for (Object &obj : dirLights) {
+      for (Light &obj : dirLights) {
         obj.draw(light_shader);
       }
 
@@ -554,12 +583,18 @@ int main(int argc, char **argv) {
           obj.draw(debug_shader);
         }
       }
+
+      ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
       glfwSwapBuffers(ctx.window);
     }
 
     glfwPollEvents();
   }
 
+  ImGui_ImplOpenGL3_Shutdown();
+  ImGui_ImplGlfw_Shutdown();
+  ImGui::DestroyContext();
+  glfwDestroyWindow(ctx.window);
   glfwTerminate();
   return 0;
 }

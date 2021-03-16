@@ -44,7 +44,7 @@ ITimer& Timer::setIntervalMillis(double time_msecs) {
 }
 double Timer::getIntervalMillis() {
   return _interval_msecs;
-  return _time_delta;
+  //return _time_delta;
 }
 
 ITimer& Timer::tick() {

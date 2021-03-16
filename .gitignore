@@ -36,3 +36,5 @@ tags
 noin
 build
 src/.cache
+.cache
+imgui.ini
