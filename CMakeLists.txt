@@ -40,18 +40,18 @@ target_include_directories(imgui
 # Executable
 add_executable(noin "")
 target_sources(noin PUBLIC 
-  "src/main.cc"
-  "src/hand_mesh.cc"
-  "src/object.cc"
-  "src/misc.cc"
-  "src/camera.cc"
-  "src/mesh.cc"
-  "src/point.cc"
-  "src/cloth.cc"
-  "src/stb_image.cc"
-  "src/time.cc"
-  "src/light.cc"
-  "src/model.cc")
+  "src/main.cpp"
+  "src/hand_mesh.cpp"
+  "src/object.cpp"
+  "src/misc.cpp"
+  "src/camera.cpp"
+  "src/mesh.cpp"
+  "src/point.cpp"
+  "src/cloth.cpp"
+  "src/stb_image.cpp"
+  "src/time.cpp"
+  "src/light.cpp"
+  "src/model.cpp")
 target_link_libraries(noin LINK_PUBLIC GLEW)
 target_link_libraries(noin LINK_PUBLIC GL)
 target_link_libraries(noin LINK_PUBLIC glfw)
