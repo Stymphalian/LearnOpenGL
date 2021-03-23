@@ -1,2 +1,7 @@
 compiledb make
 compiledb make && [[ -f noin ]] && ./noin
+
+Draw grid
+draw x,y,z axis
+clean-up code
+create a resource manager class
