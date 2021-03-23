@@ -62,6 +62,8 @@ target_link_libraries(noin_lib LINK_PUBLIC dl)
 target_link_libraries(noin_lib LINK_PUBLIC assimp)
 target_link_libraries(noin_lib LINK_PUBLIC imgui)
 target_link_libraries(noin_lib LINK_PUBLIC stdc++fs)
+target_link_libraries(noin_lib LINK_PUBLIC absl::strings)
+target_link_libraries(noin_lib LINK_PUBLIC absl::str_format)
 
 # Executable
 add_executable(noin "")

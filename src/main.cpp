@@ -24,6 +24,9 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
+#include "absl/strings/string_view.h"
+#include "absl/strings/str_format.h"
+
 #include "camera.h"
 #include "cloth.h"
 #include "hand_mesh.h"
@@ -88,17 +91,18 @@ public:
     graphicsTimer.tickWithClock(graphicsClock);
     physicsTimer.tickWithClock(physicsClock);
     inputTimer.tickWithClock(realtimeClock);
+    realtimeFrameCounter.tick(realtime_ms);
     _do_input = inputTimer.passed();
     _do_render = graphicsTimer.passed();
     _do_physics = physicsTimer.passed();
 
-    if (realtimeFrameCounter.tick(realtime_ms)) {
-      printf("%10.2fs l:%5.0f fps, i:%3.0f fps, r:%3.0f fps, p:%3.0f fps, "
-             "delta:%8fs\n",
-             realtime_ms / 1000, realtimeFrameCounter.fps(),
-             inputFrameCounter.fps(), graphicsFrameCounter.fps(),
-             physicsFrameCounter.fps(), delta_ms / 1000);
-    }
+    //if (realtimeFrameCounter.tick(realtime_ms)) {
+    //  printf("%10.2fs l:%5.0f fps, i:%3.0f fps, r:%3.0f fps, p:%3.0f fps, "
+    //         "delta:%8fs\n",
+    //         realtime_ms / 1000, realtimeFrameCounter.fps(),
+    //         inputFrameCounter.fps(), graphicsFrameCounter.fps(),
+    //         physicsFrameCounter.fps(), delta_ms / 1000);
+    //}
   }
 
   int do_input() { return _do_input; }
@@ -401,7 +405,7 @@ int main(int argc, char **argv) {
       //{"texture_emission", texture5},
   });
   Model cube = Model(cubeMesh);
-  Model backpack = Model("res/backpack/backpack.obj");
+  //Model backpack = Model("res/backpack/backpack.obj");
 
   vector<Object> objects;
   glm::vec3 cubePositions[] = {
@@ -546,11 +550,50 @@ int main(int argc, char **argv) {
       ImGui::NewFrame();
 
       if (show_demo_window) {
-        ImGui::Begin("Hello World");
-        ImGui::Text("This is text.");
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
-                    1000.0f / ImGui::GetIO().Framerate,
-                    ImGui::GetIO().Framerate);
+        //printf("%10.2fs l:%5.0f fps, i:%3.0f fps, r:%3.0f fps, p:%3.0f fps, "
+        //     "delta:%8fs\n",
+        //     realtime_ms / 1000, realtimeFrameCounter.fps(),
+        //     inputFrameCounter.fps(), graphicsFrameCounter.fps(),
+             //physicsFrameCounter.fps(), delta_ms / 1000);
+        //absl::StrFormat("%10.2fs delta:%8fs", ctx.realtime_ms / 1000, ctx.delta_ms);
+        //absl::StrFormat("%10.2fs l:%5.0f fps, i:%3.0f fps, r:%3.0f fps, p:%3.0f fps, "
+        ImGui::Begin("Information");
+        ImGui::Text(
+            "Time: %5.2fs Delta: %8fs",
+            ctx.realtime_ms / 1000, ctx.delta_ms);
+        ImGui::Text(
+            "l:%5.0f fps, i:%3.0f fps, r:%3.0f fps, p:%3.0f fps",
+            ctx.realtimeFrameCounter.fps(),
+            ctx.inputFrameCounter.fps(),
+            ctx.graphicsFrameCounter.fps(),
+            ctx.physicsFrameCounter.fps());
+        ImGui::BeginChild("Camera", ImVec2(250,100), true);
+        ImGui::Text("Camera");
+        ImGui::Text(" pos  (%5.2f,%5.2f,%5.2f)",
+            cam.translator.pos.x,
+            cam.translator.pos.y,
+            cam.translator.pos.z);
+        ImGui::Text(" front(%5.2f,%5.2f,%5.2f)",
+            cam.rotator.front().x,
+            cam.rotator.front().y,
+            cam.rotator.front().z);
+        ImGui::Text(" up   (%5.2f,%5.2f,%5.2f)",
+            cam.rotator.up().x,
+            cam.rotator.up().y,
+            cam.rotator.up().z);
+        ImGui::Text(" right(%5.2f,%5.2f,%5.2f)",
+            cam.rotator.right().x,
+            cam.rotator.right().y,
+            cam.rotator.right().z);
+        ImGui::EndChild();
+        if (ImGui::Button("F1")) { cam.reset(); }
+        ImGui::SameLine();
+        ImGui::Checkbox("Debug", &ctx.debug);
+        //ImGui::GetIO().DisplayFramebufferScale
+
+        //ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
+                    //1000.0f / ImGui::GetIO().Framerate,
+                    //ImGui::GetIO().Framerate);
         ImGui::End();
       }
 
