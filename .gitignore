@@ -38,3 +38,4 @@ build
 src/.cache
 .cache
 imgui.ini
+!res/**/*.obj
