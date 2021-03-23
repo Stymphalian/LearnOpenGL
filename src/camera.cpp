@@ -7,11 +7,14 @@
 #include "shader.h"
 
 
-Camera::Camera() {
+Camera::Camera() { 
   reset();
-  //translator.reset();
-  //rotator.reset();
-  //translator.pos.z = 3.0f;
+}
+Camera::Camera(float movement_speed, float rotation_speed,
+               float rotation_sensitivity)
+    : movement_speed(movement_speed), rotation_speed(rotation_speed),
+      rotation_senstivity(rotation_sensitivity) {
+  reset();
 }
 
 void Camera::process_input(Camera::Direction dir, float delta_secs) {

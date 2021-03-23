@@ -5,3 +5,4 @@ Draw grid
 draw x,y,z axis
 clean-up code
 create a resource manager class
+ctest -V -R camera_test

@@ -17,6 +17,8 @@ find_package(glm REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(ASSIMP REQUIRED)
+add_subdirectory(third_party/abseil-cpp)
+add_subdirectory(third_party/googletest)
 
 # IMGUI
 add_library(imgui STATIC "")
@@ -37,39 +39,50 @@ target_include_directories(imgui
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/third_party/imgui/backends>"
 )
 
+# Executable Library
+add_library(noin_lib STATIC "")
+target_sources(noin_lib PUBLIC 
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/hand_mesh.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/object.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/misc.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/camera.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/mesh.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/point.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/cloth.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/stb_image.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/time.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/light.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/model.cpp")
+target_link_libraries(noin_lib LINK_PUBLIC GLEW)
+target_link_libraries(noin_lib LINK_PUBLIC GL)
+target_link_libraries(noin_lib LINK_PUBLIC glfw)
+target_link_libraries(noin_lib LINK_PUBLIC rt)
+target_link_libraries(noin_lib LINK_PUBLIC m)
+target_link_libraries(noin_lib LINK_PUBLIC dl)
+target_link_libraries(noin_lib LINK_PUBLIC assimp)
+target_link_libraries(noin_lib LINK_PUBLIC imgui)
+target_link_libraries(noin_lib LINK_PUBLIC stdc++fs)
+
 # Executable
 add_executable(noin "")
-target_sources(noin PUBLIC 
-  "src/main.cpp"
-  "src/hand_mesh.cpp"
-  "src/object.cpp"
-  "src/misc.cpp"
-  "src/camera.cpp"
-  "src/mesh.cpp"
-  "src/point.cpp"
-  "src/cloth.cpp"
-  "src/stb_image.cpp"
-  "src/time.cpp"
-  "src/light.cpp"
-  "src/model.cpp")
-target_link_libraries(noin LINK_PUBLIC GLEW)
-target_link_libraries(noin LINK_PUBLIC GL)
-target_link_libraries(noin LINK_PUBLIC glfw)
-target_link_libraries(noin LINK_PUBLIC rt)
-target_link_libraries(noin LINK_PUBLIC m)
-target_link_libraries(noin LINK_PUBLIC dl)
-target_link_libraries(noin LINK_PUBLIC assimp)
-target_link_libraries(noin LINK_PUBLIC imgui)
-target_link_libraries(noin LINK_PUBLIC stdc++fs)
+target_sources(noin PUBLIC "src/main.cpp")
+target_link_libraries(noin LINK_PUBLIC noin_lib)
 
 # Resources
 add_custom_command(
     TARGET noin POST_BUILD
     COMMAND 
-      ln -s ${CMAKE_CURRENT_SOURCE_DIR}/res ${CMAKE_CURRENT_BINARY_DIR}/res)
+      ln -s ${CMAKE_SOURCE_DIR}/res ${CMAKE_CURRENT_BINARY_DIR}/res)
 add_custom_command(
     TARGET noin POST_BUILD
     COMMAND 
-      ln -s ${CMAKE_CURRENT_SOURCE_DIR}/shaders ${CMAKE_CURRENT_BINARY_DIR}/shaders)
+      ln -s ${CMAKE_SOURCE_DIR}/shaders ${CMAKE_CURRENT_BINARY_DIR}/shaders)
+
+# Tests
+add_executable(camera_test "")
+target_sources(camera_test PRIVATE "src/camera_test.cpp")
+add_test(NAME camera_test COMMAND camera_test)
+target_link_libraries(camera_test PRIVATE noin_lib)
+target_link_libraries(camera_test PRIVATE gtest)
 
 

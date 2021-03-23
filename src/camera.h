@@ -30,6 +30,7 @@ public:
   float rotation_senstivity = 1.0f;
 
   Camera();
+  Camera(float movement_speed, float rotation_speed, float rotation_sensitivity);
 
   void process_input(Direction dir, float delta_secs); 
   void process_rotate(Rotate dir, float delta_secs); 
