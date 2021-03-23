@@ -70,13 +70,10 @@ target_link_libraries(noin LINK_PUBLIC noin_lib)
 
 # Resources
 add_custom_command(
-    TARGET noin POST_BUILD
-    COMMAND 
-      ln -s ${CMAKE_SOURCE_DIR}/res ${CMAKE_CURRENT_BINARY_DIR}/res)
-add_custom_command(
-    TARGET noin POST_BUILD
-    COMMAND 
-      ln -s ${CMAKE_SOURCE_DIR}/shaders ${CMAKE_CURRENT_BINARY_DIR}/shaders)
+  TARGET noin POST_BUILD
+  COMMAND ln -snf "${CMAKE_SOURCE_DIR}/res" "${CMAKE_CURRENT_BINARY_DIR}/res"
+  COMMAND ln -snf "${CMAKE_SOURCE_DIR}/shaders" "${CMAKE_CURRENT_BINARY_DIR}/shaders"
+)
 
 # Tests
 add_executable(camera_test "")
