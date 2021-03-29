@@ -61,6 +61,8 @@ public:
   bool move_light = false;
   bool light_directional = false;
   bool light_spotlight = false;
+  bool pendulumSpotLights = false;
+  bool drawBorder = false;
 
   Timer graphicsTimer;
   Timer physicsTimer;
@@ -412,9 +414,13 @@ int main(int argc, char **argv) {
   // Viewport
   glViewport(0, 0, MainContext::WIDTH, MainContext::HEIGHT);
   glEnable(GL_DEPTH_TEST);
+  //glDisable(GL_STENCIL_TEST);
   glPointSize(5);
   glLineWidth(5);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  glEnable(GL_CULL_FACE);
+  glCullFace(GL_BACK);
+  //glPolygonMode(GL_FRONT, GL_FILL);
   // glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
   // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -423,6 +429,8 @@ int main(int argc, char **argv) {
   Shader light_shader("shaders/vs.glsl", "shaders/light_fs.glsl");
   Shader debug_shader("shaders/debug_vs.glsl", "shaders/debug_fs.glsl",
                       "shaders/debug_gs.glsl");
+  Shader shaderSingleColor("shaders/vs.glsl",
+                           "shaders/shader_single_color_fs.glsl");
   printf("Program start.\n");
 
   // Load a texture
@@ -455,13 +463,13 @@ int main(int argc, char **argv) {
     o.rotation.rotate(glm::vec3(1.0f, 0.3f, 0.5f), angle);
     objects.push_back(o);
   }
-  // objects.clear();
+  objects.clear();
   // objects.push_back(Object(backpack));
+  objects.push_back(Object(cube));
+  objects.push_back(Object(cube));
   // objects.push_back(Object(cube));
-  // objects.push_back(Object(cube));
-  // objects.push_back(Object(cube));
-  // objects[0].position.move_to(glm::vec3(3, 0, 0));
-  // objects[1].position.move_to(glm::vec3(-3, 0, 0));
+  objects[0].position.move_to(glm::vec3(1, 0, 0));
+  objects[1].position.move_to(glm::vec3(-1, 0, 0));
   // objects[2].position.move_to(glm::vec3(0, 0, 3));
   // objects[3].position.move_to(glm::vec3(0, 0, -3));
   // objects.clear();
@@ -507,17 +515,15 @@ int main(int argc, char **argv) {
     pointLights.push_back(l);
   }
 
-  // dirLights.clear();
-  // spotLights.clear();
-  // pointLights.clear();
+  dirLights.clear();
+  spotLights.clear();
+  //pointLights.clear();
 
   // Setup shaders
   shader.use();
   shader.setInt("numDirLights", dirLights.size());
   shader.setInt("numSpotLights", spotLights.size());
   shader.setInt("numPointLights", pointLights.size());
-
-  bool show_demo_window = true;
 
   // Main loop
   while (!glfwWindowShouldClose(ctx.window)) {
@@ -549,7 +555,7 @@ int main(int argc, char **argv) {
         spotLights[0].rotation = cam.rotator;
       }
 
-      if (true) {
+      if (ctx.pendulumSpotLights) {
         updatePendulumSpotLights(ctx, spotLights);
       }
 
@@ -575,7 +581,8 @@ int main(int argc, char **argv) {
       }
 
       glClearColor(0, 0, 0, 0);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
       // Draw
       ImGui_ImplOpenGL3_NewFrame();
@@ -584,10 +591,36 @@ int main(int argc, char **argv) {
       drawImGui(ctx, cam);
       ImGui::Render();
 
+      glEnable(GL_STENCIL_TEST);
+      glStencilMask(0xFF); // enable writing to the stencil buffer
+
       shader.use();
       cam.use(ctx.aspect_ratio(), &shader);
+      glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_KEEP);
+      glStencilOpSeparate(GL_FRONT, GL_REPLACE, GL_REPLACE, GL_REPLACE);
+      glStencilFuncSeparate(GL_BACK, GL_NEVER, 1, 0xFF); // all fragments should pass the stencil test
+      glStencilFuncSeparate(GL_FRONT, GL_ALWAYS, 1, 0xFF); // all fragments should pass the stencil test
       for (Object &obj : objects) {
         obj.draw(shader);
+      }
+
+      if (ctx.drawBorder) {
+        shaderSingleColor.use();
+        shaderSingleColor.set4Float("customColor", 0.3, 0,0.5, 1.0);
+        cam.use(ctx.aspect_ratio(), &shaderSingleColor);
+        //glStencilMask(0x00);
+        glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_KEEP);
+        glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_KEEP, GL_KEEP);
+        glStencilFuncSeparate(GL_BACK, GL_NEVER, 1, 0xFF); // all fragments should pass the stencil test
+        glStencilFuncSeparate(GL_FRONT, GL_NOTEQUAL, 1, 0xFF); // all fragments should pass the stencil test
+        for (Object &obj : objects) {
+          obj.scale.scale(1.05f);
+          obj.draw(shaderSingleColor);
+          obj.scale.scale(1.0f);
+        }
+        glStencilMask(0xFF);
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        glEnable(GL_DEPTH_TEST);
       }
 
       // Draw lights

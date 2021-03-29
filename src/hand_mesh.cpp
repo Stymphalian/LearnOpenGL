@@ -38,9 +38,12 @@ vector<glm::vec3> calculate_vertex_normals(
     const glm::vec3& b = m.at(bi).pos;
     const glm::vec3& c = m.at(ci).pos;
 
-    normals.at(ai) += glm::cross(c-a, b-a);
-    normals.at(bi) += glm::cross(a-b, c-b);
-    normals.at(ci) += glm::cross(b-c, a-c);
+    normals.at(ai) += glm::cross(b-a, c-a);
+    normals.at(bi) += glm::cross(c-b, a-b);
+    normals.at(ci) += glm::cross(a-c, b-c);
+    //normals.at(ai) += glm::cross(c-a, b-a);
+    //normals.at(bi) += glm::cross(a-b, c-b);
+    //normals.at(ci) += glm::cross(b-c, a-c);
   }
 
   for(glm::vec3& v: normals) {
@@ -136,25 +139,45 @@ Mesh create_cube_mesh2(std::map<string, unsigned int> texs) {
       {{0.5f, -0.5f, -0.5f}, {0,0,0}, {1,0}},
       {{-0.5f,-0.5f, -0.5f},{0,0,0}, {0,0}},
   };
+  //vector<unsigned int> idx = {
+  //  // front
+  //  0,1,2,
+  //  0,2,3,
+  //  // back
+  //  4,5,6,
+  //  4,6,7,
+  //  // left
+  //  8,9,10,
+  //  8,10,11,
+  //  // right
+  //  12,13,14,
+  //  12,14,15,
+  //  // top
+  //  16,17,18,
+  //  16,18,19,
+  //  // bot
+  //  20,21,22,
+  //  20,22,23
+  //};
   vector<unsigned int> idx = {
     // front
-    0,1,2,
-    0,2,3,
+    0,2,1,
+    0,3,2,
     // back
-    4,5,6,
-    4,6,7,
+    4,6,5,
+    4,7,6,
     // left
-    8,9,10,
-    8,10,11,
+    8,10,9,
+    8,11,10,
     // right
-    12,13,14,
-    12,14,15,
+    12,14,13,
+    12,15,14,
     // top
-    16,17,18,
-    16,18,19,
+    16,18,17,
+    16,19,18,
     // bot
-    20,21,22,
-    20,22,23
+    20,22,21,
+    20,23,22
   };
 
   // Assign the normals into the Vertex object
